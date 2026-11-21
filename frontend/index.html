@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyDesk — Minimalist AI Workspace for JEE, NEET & Boards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #0b0b0d;
+      --surface-2: #141417;
+      --border: rgba(255, 255, 255, 0.11);
+      --border-strong: rgba(255, 255, 255, 0.24);
+      --text: #ffffff;
+      --muted: #8e8e93;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+    /* Sticky Apple-style Frosted Monochrome Nav */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1120px; margin: 0 auto; padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.03em; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 9px; }
+    .logo-mark { width: 10px; height: 10px; border-radius: 50%; background: #fff; }
+    .nav-links { display: flex; gap: 26px; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta { display: flex; gap: 10px; align-items: center; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 18px; border-radius: 999px; font-size: 13px; font-weight: 600;
+      text-decoration: none; cursor: pointer; border: 1px solid var(--border-strong);
+      background: transparent; color: #fff; transition: transform 0.25s var(--ease), background 0.25s, color 0.25s;
+    }
+    .btn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.08); }
+    .btn:active { transform: scale(0.97); }
+    .btn-white { background: #fff; color: #000; border-color: #fff; }
+    .btn-white:hover { background: #e8e8ed; color: #000; }
+    .btn-lg { padding: 14px 26px; font-size: 15px; }
+
+    /* Scroll Reveal Animation */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.85s var(--ease), transform 0.85s var(--ease); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Hero */
+    .hero { max-width: 980px; margin: 0 auto; padding: 108px 24px 76px; text-align: center; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border);
+      background: var(--surface); color: #d1d1d6; font-size: 12px; font-weight: 500; margin-bottom: 26px;
+    }
+    .hero h1 {
+      font-size: clamp(40px, 7vw, 72px); font-weight: 800; letter-spacing: -0.045em;
+      line-height: 1.04; margin-bottom: 22px;
+      background: linear-gradient(180deg, #ffffff 40%, #8e8e93 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p { font-size: clamp(16px, 2.2vw, 20px); color: var(--muted); max-width: 640px; margin: 0 auto 36px; line-height: 1.55; }
+    .hero-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .hero-meta { margin-top: 22px; font-size: 12px; color: #6e6e73; }
+
+    /* Clean App Mockup Preview */
+    .showcase-frame {
+      max-width: 1040px; margin: 56px auto 0; padding: 12px;
+      border-radius: 26px; border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
+    }
+    .showcase-inner {
+      background: var(--surface); border-radius: 18px; border: 1px solid var(--border);
+      padding: 26px; text-align: left;
+    }
+    .mock-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
+    .dots { display: flex; gap: 7px; }
+    .dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+    .mock-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .mock-tile { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+    .mock-tile small { color: var(--muted); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .mock-tile h4 { margin: 8px 0 6px; font-size: 15px; font-weight: 600; }
+    .mock-tile p { font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+    /* Sections */
+    .section { max-width: 1080px; margin: 0 auto; padding: 92px 24px; }
+    .sec-head { text-align: center; max-width: 640px; margin: 0 auto 54px; }
+    .sec-head h2 { font-size: clamp(28px, 4.5vw, 44px); font-weight: 800; letter-spacing: -0.035em; margin-bottom: 12px; }
+    .sec-head p { color: var(--muted); font-size: 16px; line-height: 1.55; }
+
+    /* Bento Showcase */
+    .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+      padding: 28px; transition: transform 0.35s var(--ease), border-color 0.3s;
+    }
+    .card:hover { transform: translateY(-4px); border-color: var(--border-strong); }
+    .card.span-2 { grid-column: span 2; }
+    .card-kicker { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .card h3 { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
+    .card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* Pricing */
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; }
+    .price-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+      padding: 32px 26px; display: flex; flex-direction: column; justify-content: space-between;
+      transition: transform 0.35s var(--ease), border-color 0.3s;
+    }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.featured {
+      background: #ffffff; color: #000000; border-color: #ffffff;
+    }
+    .price-card.featured .muted-text { color: #52525b; }
+    .price-card.featured li { border-color: rgba(0,0,0,0.08); }
+    .price-tag { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; }
+    .price-num { font-size: 46px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; margin: 10px 0 6px; }
+    .price-num span { font-size: 15px; font-weight: 500; }
+    .muted-text { color: var(--muted); font-size: 13px; }
+    .price-list { list-style: none; margin: 22px 0 28px; }
+    .price-list li { font-size: 13.5px; padding: 9px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+    /* QR Checkout & OTP Box */
+    .checkout-wrap {
+      max-width: 920px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 28px; padding: 34px;
+    }
+    .plan-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+    .plan-opt {
+      padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2);
+      color: var(--muted); cursor: pointer; text-align: left; transition: all 0.2s;
+    }
+    .plan-opt.active { background: #fff; color: #000; border-color: #fff; }
+    .plan-opt strong { display: block; font-size: 15px; }
+    .plan-opt span { font-size: 12px; opacity: 0.8; }
+
+    .qr-card { background: #fff; color: #000; border-radius: 20px; padding: 20px; text-align: center; }
+    .qr-card img { width: 200px; height: 200px; object-fit: contain; display: block; margin: 0 auto 10px; }
+    .qr-card strong { font-size: 19px; display: block; }
+    .qr-card small { color: #52525b; font-size: 12px; }
+
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; background: var(--surface-2); border-radius: 14px; border: 1px solid var(--border); margin-bottom: 18px; }
+    .tab-btn { padding: 10px; border: none; border-radius: 10px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; }
+    .tab-btn.active { background: #fff; color: #000; }
+
+    label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 6px; font-weight: 500; }
+    input {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
+      background: var(--surface-2); color: #fff; font-size: 14px; outline: none;
+    }
+    input:focus { border-color: #fff; }
+    .otp-box { text-align: center; letter-spacing: 0.45em; font-size: 20px; font-weight: 700; }
+    .msg { margin-top: 12px; padding: 12px; border-radius: 12px; font-size: 13px; display: none; line-height: 1.45; }
+    .msg.ok { display: block; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; }
+    .msg.err { display: block; background: rgba(239,68,68,0.14); border: 1px solid rgba(239,68,68,0.35); color: #fca5a5; }
+    .pane { display: none; }
+    .pane.active { display: block; }
+
+    footer { border-top: 1px solid var(--border); padding: 34px 24px; text-align: center; color: #6e6e73; font-size: 13px; }
+    footer a { color: var(--muted); text-decoration: none; margin: 0 10px; }
+
+    @media (max-width: 860px) {
+      .nav-links { display: none; }
+      .mock-grid, .bento, .pricing-grid, .checkout-wrap { grid-template-columns: 1fr; }
+      .card.span-2 { grid-column: span 1; }
+      .hero { padding-top: 68px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#" class="logo"><span class="logo-mark"></span>StudyDesk</a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#checkout">UPI Checkout</a>
+      </div>
+      <div class="nav-cta">
+        <a href="app.html" class="btn">Open Workspace</a>
+        <a href="#checkout" class="btn btn-white" onclick="selectPlan(1)">Try for ₹1</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO ADVERTISEMENT -->
+  <section class="hero reveal">
+    <div class="pill">7-Day Full Access Trial for ₹1 • Then ₹99/month</div>
+    <h1>Study smarter.<br/>Zero noise.</h1>
+    <p>10 AI study tools, verified Class 10–12 NCERT chapter notes, Pomodoro deep-focus, multi-day timetables, and always-free live student chat—engineered in one minimalist workspace.</p>
+    <div class="hero-actions">
+      <a href="#checkout" class="btn btn-white btn-lg" onclick="selectPlan(1)">Start 7-Day Trial for ₹1</a>
+      <a href="app.html" class="btn btn-lg">Explore Free Workspace →</a>
+    </div>
+    <p class="hero-meta">No credit card • Instant UPI QR + 6-digit OTP activation • Built for JEE, NEET & CBSE Boards</p>
+
+    <div class="showcase-frame">
+      <div class="showcase-inner">
+        <div class="mock-bar">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span style="font-size:12px;color:var(--muted);">studydesk / workspace</span>
+          <span style="font-size:11px;border:1px solid var(--border);padding:3px 10px;border-radius:999px;color:#fff;">6 Minimalist Themes</span>
+        </div>
+        <div class="mock-grid">
+          <div class="mock-tile">
+            <small>01 • Vision AI</small>
+            <h4>Photo-to-Doubt Solver</h4>
+            <p>Snap any Physics, Chemistry, or Maths question for clear step-by-step Hinglish solutions.</p>
+          </div>
+          <div class="mock-tile">
+            <small>02 • Curated Library</small>
+            <h4>Class 10, 11 & 12 Notes</h4>
+            <p>Preview chapter highlights instantly and unlock full official chapter PDFs in one tap.</p>
+          </div>
+          <div class="mock-tile">
+            <small>03 • Real-Time</small>
+            <h4>Always-Free Live Chat</h4>
+            <p>Low-ping student rooms for JEE, NEET, and Boards—free forever for every student.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURE SHOWCASE -->
+  <section id="features" class="section reveal">
+    <div class="sec-head">
+      <h2>Everything you actually use.<br/>Nothing that distracts you.</h2>
+      <p>Designed around calm black-and-white focus so you spend hours solving problems instead of fighting cluttered apps.</p>
+    </div>
+    <div class="bento">
+      <div class="card span-2">
+        <div class="card-kicker">10 Integrated AI Engines</div>
+        <h3>Photo Doubts, Flashcards, YouTube Cheat Sheets, Mock Tests & Audio Podcasts.</h3>
+        <p>Turn messy notebook photos into flip flashcards, convert 2-hour lectures into 1-page formula sheets, generate timed JEE/NEET mock tests, listen to PDF chapters as spoken podcasts, grade board essays, draw concept mind maps, practice spoken English, and debug Python/C++ code.</p>
+      </div>
+      <div class="card">
+        <div class="card-kicker">6 Minimalist Themes</div>
+        <h3>2 Free. 4 Studio Pro.</h3>
+        <p>Start with Monochrome Dark and Pure Paper Light. Unlock Liquid Glass, Warm Sand, Graphite Slate, and Deep Ink with Pro.</p>
+      </div>
+      <div class="card">
+        <div class="card-kicker">Daily Execution</div>
+        <h3>Right/Wrong Tasks & Alerts</h3>
+        <p>Check off daily study targets with honest ✓ or ✗ tracking, Mon–Sun custom schedules, Pomodoro sprints, and real exam reminders.</p>
+      </div>
+      <div class="card span-2">
+        <div class="card-kicker">Community + Personal Notes</div>
+        <h3>Free Note Maker & Always-Free Live Chat.</h3>
+        <p>Write and save unlimited personal revision notes and talk in ultra-low-ping WebSocket study lounges for ₹0 forever. Preview curated Class 10, 11 & 12 chapter PDFs before unlocking full downloads.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING FOCUS: FREE vs ₹1 TRIAL vs ₹99 PRO -->
+  <section id="pricing" class="section reveal">
+    <div class="sec-head">
+      <h2>Simple student pricing.</h2>
+      <p>Try every Pro feature for a full week for ₹1, or go straight to the ₹99 monthly plan.</p>
+    </div>
+    <div class="pricing-grid">
+      <!-- Free Plan -->
+      <div class="price-card">
+        <div>
+          <div class="price-tag muted-text">Free Starter</div>
+          <div class="price-num">₹0 <span>/ forever</span></div>
+          <p class="muted-text">Test the workspace before paying anything.</p>
+          <ul class="price-list">
+            <li><span>AI Study Tools</span><strong>5 Free Uses</strong></li>
+            <li><span>Minimalist Themes</span><strong>2 Free</strong></li>
+            <li><span>Tasks & Exam Calendar</span><strong>3-Day Trial</strong></li>
+            <li><span>Live Chat & Note Maker</span><strong>Always Free</strong></li>
+            <li><span>Class 10–12 Notes PDFs</span><strong>Preview Only</strong></li>
+          </ul>
+        </div>
+        <a href="app.html" class="btn" style="width:100%;">Start Free</a>
+      </div>
+
+      <!-- ₹1 7-Day Trial (Highlighted) -->
+      <div class="price-card featured">
+        <div>
+          <div class="price-tag">Most Popular • Trial</div>
+          <div class="price-num">₹1 <span>/ 7 days</span></div>
+          <p class="muted-text">Experience full Pro power for one rupee.</p>
+          <ul class="price-list">
+            <li><span>All 10 AI Tools</span><strong>Unlimited</strong></li>
+            <li><span>All 6 Studio Themes</span><strong>Unlocked</strong></li>
+            <li><span>Tasks, Calendar & Schedules</span><strong>Unlocked</strong></li>
+            <li><span>Class 10–12 Full PDF Notes</span><strong>Unlocked</strong></li>
+            <li><span>Live Chat & Note Maker</span><strong>Always Free</strong></li>
+            <li><strong>Bonus: Password for the Free Movies Website included</strong></li>
+          </ul>
+        </div>
+        <a href="#checkout" class="btn" style="width:100%;background:#000;color:#fff;border-color:#000;" onclick="selectPlan(1)">Activate ₹1 Trial</a>
+      </div>
+
+      <!-- ₹99 Monthly Pro -->
+      <div class="price-card">
+        <div>
+          <div class="price-tag muted-text">Pro Monthly</div>
+          <div class="price-num">₹99 <span>/ month</span></div>
+          <p class="muted-text">Full 30-day access for serious exam prep.</p>
+          <ul class="price-list">
+            <li><span>All 10 AI Study Tools</span><strong>Unlimited</strong></li>
+            <li><span>All 6 Minimalist Themes</span><strong>Unlocked</strong></li>
+            <li><span>Tasks, Calendar & Alerts</span><strong>Unlimited</strong></li>
+            <li><span>Class 10–12 Full PDF Notes</span><strong>Unlocked</strong></li>
+            <li><span>Priority Fast Activation</span><strong>Included</strong></li>
+            <li><strong>Bonus: Password for the Free Movies Website included</strong></li>
+          </ul>
+        </div>
+        <a href="#checkout" class="btn btn-white" style="width:100%;" onclick="selectPlan(99)">Get ₹99 Pro Plan</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPI QR PAYMENT + 6-DIGIT OTP ACTIVATION -->
+  <section id="checkout" class="section reveal">
+    <div class="sec-head">
+      <h2>Instant UPI QR & OTP Activation</h2>
+      <p>Choose your plan, scan the QR code with any UPI app, submit your 12-digit UTR, and unlock Pro with your 6-digit OTP.</p>
+    </div>
+
+    <div class="checkout-wrap">
+      <div>
+        <div class="plan-switch">
+          <button type="button" class="plan-opt active" id="opt1" onclick="selectPlan(1)">
+            <strong>₹1 Trial</strong>
+            <span>7 Days Full Access</span>
+          </button>
+          <button type="button" class="plan-opt" id="opt99" onclick="selectPlan(99)">
+            <strong>₹99 Pro</strong>
+            <span>30 Days Full Access</span>
+          </button>
+        </div>
+        <div class="qr-card">
+          <img src="qr.png" alt="UPI QR Code" />
+          <strong id="qrAmountText">Pay ₹1 (7-Day Full Trial)</strong>
+          <small>Scan using GPay, PhonePe, Paytm, or FamApp</small>
+        </div>
+      </div>
+
+      <div>
+        <div class="tabs">
+          <button type="button" class="tab-btn active" id="tabPay" onclick="switchTab('pay')">1. Submit Payment</button>
+          <button type="button" class="tab-btn" id="tabOtp" onclick="switchTab('otp')">2. Enter 6-Digit OTP</button>
+        </div>
+
+        <div id="panePay" class="pane active">
+          <form id="payForm">
+            <label>Your Email Address</label>
+            <input type="email" id="payEmail" placeholder="student@gmail.com" required />
+            <label>WhatsApp / Mobile Number (10 digits)</label>
+            <input type="tel" id="payPhone" placeholder="9876543210" maxlength="10" pattern="\d{10}" required />
+            <label>12-Digit UPI UTR / Reference Number</label>
+            <input type="text" id="payUtr" placeholder="e.g. 431298765432" maxlength="12" pattern="\d{12}" required />
+            <button type="submit" class="btn btn-white" id="payBtn" style="width:100%;margin-top:18px;padding:13px;">Submit for Approval</button>
+          </form>
+          <div id="payMsg" class="msg"></div>
+        </div>
+
+        <div id="paneOtp" class="pane">
+          <form id="otpForm">
+            <label>Your Email Address</label>
+            <input type="email" id="otpEmail" placeholder="student@gmail.com" required />
+            <label>6-Digit Activation OTP</label>
+            <input type="text" id="otpCode" class="otp-box" placeholder="000000" maxlength="6" pattern="\d{6}" required />
+            <button type="submit" class="btn btn-white" id="otpBtn" style="width:100%;margin-top:18px;padding:13px;">Verify OTP & Unlock Pro</button>
+          </form>
+          <div id="otpMsg" class="msg"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    StudyDesk • Built for Indian Students &nbsp;|&nbsp;
+    <a href="app.html">Workspace</a>
+    <a href="#pricing">Pricing</a>
+    <a href="admin.html">Admin</a>
+  </footer>
+
+  <script>
+    // Change to your live Render URL after deploying
+    const API_BASE = "http://127.0.0.1:8000";
+
+    // Smooth Apple-style Scroll Reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+
+    let selectedPlan = 1;
+    function selectPlan(amt) {
+      selectedPlan = amt;
+      document.getElementById("opt1").classList.toggle("active", amt === 1);
+      document.getElementById("opt99").classList.toggle("active", amt === 99);
+      document.getElementById("qrAmountText").textContent = amt === 1 ? "Pay ₹1 (7-Day Full Trial)" : "Pay ₹99 (30-Day Pro Plan)";
+    }
+
+    function switchTab(t) {
+      document.getElementById("tabPay").classList.toggle("active", t === "pay");
+      document.getElementById("tabOtp").classList.toggle("active", t === "otp");
+      document.getElementById("panePay").classList.toggle("active", t === "pay");
+      document.getElementById("paneOtp").classList.toggle("active", t === "otp");
+    }
+
+    function setMsg(id, text, isErr) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = "msg " + (isErr ? "err" : "ok");
+    }
+
+    document.getElementById("payForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("payBtn");
+      btn.disabled = true; btn.textContent = "Submitting...";
+      const email = document.getElementById("payEmail").value.trim();
+      try {
+        const res = await fetch(`${API_BASE}/api/payment/submit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            phone: document.getElementById("payPhone").value.trim(),
+            utr: document.getElementById("payUtr").value.trim(),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Could not submit payment.");
+        setMsg("payMsg", data.message + " Switch to Tab 2 once you receive your OTP.", false);
+        document.getElementById("otpEmail").value = email;
+        e.target.reset();
+      } catch (err) {
+        setMsg("payMsg", err.message, true);
+      } finally {
+        btn.disabled = false; btn.textContent = "Submit for Approval";
+      }
+    };
+
+    document.getElementById("otpForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("otpBtn");
+      btn.disabled = true; btn.textContent = "Verifying...";
+      try {
+        const res = await fetch(`${API_BASE}/api/payment/verify-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: document.getElementById("otpEmail").value.trim(),
+            otp_code: document.getElementById("otpCode").value.trim(),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Invalid OTP.");
+        localStorage.setItem("sd_pro", "true");
+        localStorage.setItem("sd_pro_until", data.active_until || "Active");
+        setMsg("otpMsg", `${data.message} Redirecting to your unlocked StudyDesk...`, false);
+        setTimeout(() => { window.location.href = "app.html"; }, 1200);
+      } catch (err) {
+        setMsg("otpMsg", err.message, true);
+      } finally {
+        btn.disabled = false; btn.textContent = "Verify OTP & Unlock Pro";
+      }
+    };
+  </script>
+    <!-- OLD WEBSITE AD BADGE & DEVELOPER CREDITS -->
+  <!-- OLD WEBSITE AD BADGE & DEVELOPER CREDITS -->
+<footer style="margin:48px auto 28px;max-width:980px;padding:24px 18px 0;border-top:1px solid rgba(255,255,255,0.12);text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;">
+  <a href="https://omni-typing-iq.vercel.app/" target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;padding:12px 22px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:#fff;text-decoration:none;font-size:13.5px;font-weight:600;">
+    <span style="background:#fff;color:#000;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;">Check Out My Old Website</span>
+    <span>Practice Typing on <strong>OmniTyping IQ</strong> (omni-typing-iq.vercel.app) ↗</span>
+  </a>
+  <p style="font-size:13px;color:#8e8e93;">StudyDesk • Created by Developer <strong style="color:#fff;">Moulik Soni</strong></p>
+</footer>
+
+<!-- HOURLY PLANS POPUP FOR INDEX.HTML -->
+<div id="idxPlanPop" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:999;padding:20px;">
+  <div style="max-width:460px;width:100%;background:#0e0e12;border:1px solid rgba(255,255,255,0.16);border-radius:20px;padding:24px;color:#fff;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#8e8e93;">LIMITED OFFER • STUDYDESK PRO</div>
+    <h2 style="margin:6px 0 8px;">₹1 (7-Day Trial) • ₹99 (30-Day Pro)</h2>
+    <ul style="margin:0 0 16px 18px;font-size:13px;color:#a1a1aa;line-height:1.7;">
+      <li>Unlimited AI Tools, PYQ Arena, 10–15 DPPs &amp; 3D Concept Lab</li>
+      <li>All Class 10, Class 11 JEE &amp; Class 12 PDF Notes unlocked</li>
+      <li><strong style="color:#fff;">Password for the Free Movies Website included</strong></li>
+      <li>Or earn <strong>1,000 XP</strong> inside the app for 30 days FREE!</li>
+    </ul>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="#checkout" onclick="document.getElementById('idxPlanPop').style.display='none'" style="flex:1;text-align:center;padding:10px 16px;border-radius:999px;background:#fff;color:#000;font-weight:700;text-decoration:none;font-size:13px;">View Plans</a>
+      <button onclick="document.getElementById('idxPlanPop').style.display='none'" style="padding:10px 16px;border-radius:999px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;font-weight:600;cursor:pointer;font-size:13px;">Close</button>
+    </div>
+  </div>
+</div>
+<script>
+  (function () {
+    const showHourly = () => {
+      if (localStorage.getItem("sd_pro") === "true") return;
+      const last = Number(localStorage.getItem("sd_last_plan_popup") || "0");
+      if (Date.now() - last >= 3600000) {
+        localStorage.setItem("sd_last_plan_popup", String(Date.now()));
+        document.getElementById("idxPlanPop").style.display = "flex";
+      }
+    };
+    setTimeout(showHourly, 1500);
+    setInterval(showHourly, 3600000);
+  })();
+</script>
+</body>
+</html>

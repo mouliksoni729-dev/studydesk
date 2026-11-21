@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="mono-dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyDesk — Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root { --ease: cubic-bezier(0.16, 1, 0.3, 1); --radius: 18px; }
+
+    /* ===== 2 FREE MINIMALIST THEMES ===== */
+    [data-theme="mono-dark"] {
+      --bg: #000000; --bg-mesh: none; --surface: #0b0b0d; --surface-2: #141418;
+      --border: rgba(255,255,255,0.11); --text: #ffffff; --muted: #8e8e93;
+      --accent: #ffffff; --accent-text: #000000; --ok: #4ade80; --bad: #f87171; --blur: none;
+    }
+    [data-theme="mono-light"] {
+      --bg: #f5f5f7; --bg-mesh: none; --surface: #ffffff; --surface-2: #ededf0;
+      --border: rgba(0,0,0,0.09); --text: #111113; --muted: #6e6e73;
+      --accent: #111113; --accent-text: #ffffff; --ok: #16a34a; --bad: #dc2626; --blur: none;
+    }
+
+    /* ===== 4 PRO MINIMALIST THEMES ===== */
+    [data-theme="liquid-glass"] {
+      --bg: #08080a;
+      --bg-mesh: radial-gradient(circle at 18% 15%, rgba(255,255,255,0.10), transparent 40%),
+                 radial-gradient(circle at 82% 85%, rgba(255,255,255,0.07), transparent 42%);
+      --surface: rgba(255,255,255,0.055); --surface-2: rgba(255,255,255,0.095);
+      --border: rgba(255,255,255,0.16); --text: #fafafa; --muted: #a1a1aa;
+      --accent: #ffffff; --accent-text: #000000; --ok: #4ade80; --bad: #fca5a5; --blur: blur(24px) saturate(150%);
+    }
+    [data-theme="warm-sand"] {
+      --bg: #f3efe8; --bg-mesh: none; --surface: #fbf9f5; --surface-2: #eae4da;
+      --border: rgba(28,25,23,0.11); --text: #1c1917; --muted: #78716c;
+      --accent: #1c1917; --accent-text: #fbf9f5; --ok: #15803d; --bad: #b91c1c; --blur: none;
+    }
+    [data-theme="graphite"] {
+      --bg: #161618; --bg-mesh: none; --surface: #1f1f23; --surface-2: #29292e;
+      --border: rgba(255,255,255,0.10); --text: #f4f4f5; --muted: #a1a1aa;
+      --accent: #f4f4f5; --accent-text: #161618; --ok: #4ade80; --bad: #fb7185; --blur: none;
+    }
+    [data-theme="deep-ink"] {
+      --bg: #0a0c10; --bg-mesh: none; --surface: #11141b; --surface-2: #191e28;
+      --border: rgba(255,255,255,0.09); --text: #eef2f7; --muted: #8b95a5;
+      --accent: #eef2f7; --accent-text: #0a0c10; --ok: #34d399; --bad: #f87171; --blur: none;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; }
+    body {
+      background: var(--bg); background-image: var(--bg-mesh); background-attachment: fixed;
+      color: var(--text); min-height: 100vh; transition: background 0.4s var(--ease), color 0.3s;
+    }
+
+    .shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; padding: 20px 14px;
+      border-right: 1px solid var(--border); background: var(--surface);
+      backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+      display: flex; flex-direction: column; gap: 4px; overflow-y: auto;
+    }
+    .brand { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px 14px; }
+    .brand a { text-decoration: none; color: var(--text); font-weight: 800; font-size: 17px; letter-spacing: -0.03em; display: flex; align-items: center; gap: 8px; }
+    .brand-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text); }
+    .nav-group { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 10px 12px 4px; }
+    .nav-btn {
+      width: 100%; text-align: left; padding: 9px 12px; border-radius: 12px; border: 1px solid transparent;
+      background: transparent; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; transition: all 0.22s var(--ease);
+    }
+    .nav-btn:hover { background: var(--surface-2); color: var(--text); }
+    .nav-btn.active { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+    .mini-pill { font-size: 10px; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+
+    .main { padding: 20px 28px 40px; max-width: 1200px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+      padding: 13px 18px; border-radius: var(--radius); margin-bottom: 22px;
+      background: var(--surface); border: 1px solid var(--border); backdrop-filter: var(--blur);
+    }
+    .topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .xp-pill {
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface-2); cursor: pointer; font-size: 12px; font-weight: 700;
+    }
+    .xp-bar-wrap { width: 100%; height: 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; margin: 10px 0; }
+    .xp-bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s var(--ease); }
+
+    select, input, textarea {
+      background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 11px; padding: 10px 12px; font-size: 13.5px; outline: none;
+    }
+    select:focus, input:focus, textarea:focus { border-color: var(--text); }
+    option { background: #141417; color: #fff; }
+    [data-theme="mono-light"] option, [data-theme="warm-sand"] option { background: #ffffff; color: #111113; }
+
+    .btn {
+      padding: 9px 15px; border-radius: 999px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font-weight: 600; font-size: 12.5px;
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      transition: transform 0.2s var(--ease), opacity 0.2s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: scale(0.97); }
+    .btn-accent { background: var(--accent); color: var(--accent-text); border-color: transparent; font-weight: 700; }
+    .btn-danger { color: var(--bad); border-color: rgba(248,113,113,0.35); background: transparent; }
+
+    .section { display: none; animation: fadeSlide 0.42s var(--ease); flex: 1; }
+    .section.active { display: block; }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .sec-head { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+    .sec-title { font-size: 25px; font-weight: 800; letter-spacing: -0.03em; }
+    .sec-sub { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
+    .quota-badge { font-size: 12px; font-weight: 600; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); }
+
+    .bento { display: grid; grid-template-columns: repeat(auto-fill, minmax(246px, 1fr)); gap: 14px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px; cursor: pointer; backdrop-filter: var(--blur);
+      transition: transform 0.3s var(--ease), border-color 0.25s;
+    }
+    .card:hover { transform: translateY(-3px); border-color: var(--text); }
+    .kicker { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .card h3 { font-size: 15px; font-weight: 700; margin: 7px 0 6px; }
+    .card p { font-size: 12.8px; color: var(--muted); line-height: 1.48; }
+
+    .tool-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .tool-bar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 22px; backdrop-filter: var(--blur); margin-top: 16px;
+    }
+    .form-grid { display: grid; gap: 12px; margin: 14px 0; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .output {
+      margin-top: 16px; padding: 16px; border-radius: 13px; background: var(--surface-2);
+      border: 1px solid var(--border); white-space: pre-wrap; line-height: 1.65; font-size: 13.5px;
+      max-height: 480px; overflow-y: auto;
+    }
+
+    .ai-thread {
+      margin-top: 16px; padding: 14px; border-radius: 13px; background: var(--surface-2);
+      border: 1px solid var(--border); max-height: 480px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .ai-bubble {
+      padding: 11px 14px; border-radius: 13px; font-size: 13.5px; line-height: 1.6;
+      white-space: pre-wrap; border: 1px solid var(--border); max-width: 92%;
+    }
+    .ai-bubble.user { align-self: flex-end; background: var(--accent); color: var(--accent-text); border-color: transparent; }
+    .ai-bubble.assistant { align-self: flex-start; background: var(--surface); color: var(--text); }
+    .ai-bubble-meta { font-size: 10.5px; opacity: 0.72; margin-bottom: 4px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+
+    .q-card { padding: 18px; border-radius: 15px; background: var(--surface-2); border: 1px solid var(--border); margin-top: 14px; }
+    .q-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .q-tag { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); }
+    .q-tag.chance { border-color: var(--ok); color: var(--ok); }
+    .opt-btn {
+      width: 100%; text-align: left; padding: 10px 13px; margin-top: 7px; border-radius: 11px;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text);
+      font-size: 13.5px; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    }
+    .opt-btn:hover { border-color: var(--text); }
+    .opt-btn.correct { border-color: var(--ok); background: rgba(74, 222, 128, 0.14); }
+    .opt-btn.wrong { border-color: var(--bad); background: rgba(248, 113, 113, 0.14); }
+    .scratch-wrap { margin-top: 10px; padding: 10px; border-radius: 12px; border: 1px dashed var(--border); background: var(--surface); display: none; }
+    .scratch-canvas { width: 100%; height: 150px; background: #0c0c0f; border-radius: 8px; cursor: crosshair; touch-action: none; display: block; }
+
+    .visual3d-frame { width: 100%; height: 430px; border: 1px solid var(--border); border-radius: 14px; background: #05070d; margin-top: 14px; }
+
+    .list-item {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      padding: 13px 15px; border-radius: 13px; background: var(--surface-2);
+      border: 1px solid var(--border); margin-bottom: 10px;
+    }
+    .list-item.done { opacity: 0.72; text-decoration: line-through; }
+    .list-item.missed { border-color: var(--bad); opacity: 0.85; }
+    .day-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .day-tab { padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 12.5px; font-weight: 600; cursor: pointer; }
+    .day-tab.active { background: var(--accent); color: var(--accent-text); border-color: transparent; }
+
+    .pomo-clock { font-size: 74px; font-weight: 800; letter-spacing: -0.045em; text-align: center; margin: 22px 0; font-variant-numeric: tabular-nums; }
+    .center-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+    .chat-box { height: 400px; overflow-y: auto; padding: 14px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); margin-bottom: 12px; display: flex; flex-direction: column; gap: 9px; }
+    .chat-msg { padding: 10px 13px; border-radius: 13px; background: var(--surface); border: 1px solid var(--border); max-width: 82%; }
+    .chat-meta { font-size: 11px; color: var(--muted); margin-bottom: 4px; display: flex; gap: 8px; }
+
+    .preview-sheet { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin: 14px 0; }
+    .blurred-page { filter: blur(5.5px); user-select: none; pointer-events: none; opacity: 0.65; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
+
+    .flash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(225px, 1fr)); gap: 12px; margin-top: 12px; }
+    .flashcard { padding: 16px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); cursor: pointer; min-height: 120px; }
+
+    .site-footer {
+      margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
+    }
+    .promo-badge {
+      display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center;
+      padding: 12px 20px; border-radius: 999px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600;
+      transition: transform 0.25s var(--ease), border-color 0.25s;
+    }
+    .promo-badge:hover { transform: translateY(-2px); border-color: var(--text); }
+    .promo-tag { font-size: 10.5px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: var(--accent); color: var(--accent-text); text-transform: uppercase; letter-spacing: 0.06em; }
+    .credits-line { font-size: 12.5px; color: var(--muted); }
+    .credits-line strong { color: var(--text); }
+
+    .xp-toast {
+      position: fixed; bottom: 22px; right: 22px; z-index: 120; padding: 10px 18px; border-radius: 999px;
+      background: var(--accent); color: var(--accent-text); font-weight: 800; font-size: 13px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45); display: none; animation: fadeSlide 0.25s var(--ease);
+    }
+
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.74); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 99; padding: 20px; }
+    .modal-bg.open { display: flex; }
+    .modal { width: 100%; max-width: 490px; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 26px; animation: fadeSlide 0.3s var(--ease); max-height: 90vh; overflow-y: auto; }
+
+    @media (max-width: 860px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; border-right: none; border-bottom: 1px solid var(--border); }
+      .brand, .nav-group { display: none; }
+      .nav-btn { width: auto; white-space: nowrap; gap: 8px; }
+      .row-2, .row-3 { grid-template-columns: 1fr; }
+      .main { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand"><a href="index.html"><span class="brand-dot"></span>StudyDesk</a></div>
+    <div class="nav-group">AI &amp; Concepts</div>
+    <button class="nav-btn active" data-sec="hub" onclick="openSection('hub', this)"><span>10 AI Tools</span><span class="mini-pill" id="sbAiPill">5 Left</span></button>
+    <button class="nav-btn" data-sec="visual3d" onclick="openSection('visual3d', this)"><span>3D Concept Lab</span><span class="mini-pill">3D WebGL</span></button>
+    <button class="nav-btn" data-sec="notes" onclick="openSection('notes', this)"><span>All Chapter Notes</span><span class="mini-pill">93 PDFs</span></button>
+
+    <div class="nav-group">Practice &amp; XP</div>
+    <button class="nav-btn" data-sec="pyq" onclick="openSection('pyq', this)"><span>PYQ Arena (JEE/NEET)</span><span class="mini-pill">+25 XP</span></button>
+    <button class="nav-btn" data-sec="dpp" onclick="openSection('dpp', this)"><span>DPPs &amp; Daily Puzzle</span><span class="mini-pill">10–15 Qs</span></button>
+    <button class="nav-btn" data-sec="rewards" onclick="openSection('rewards', this)"><span>XP &amp; Mistake Book</span><span class="mini-pill" id="sbXpPill">0 XP</span></button>
+
+    <div class="nav-group">Workspace</div>
+    <button class="nav-btn" data-sec="chat" onclick="openSection('chat', this)"><span>Live Chat</span><span class="mini-pill">Free</span></button>
+    <button class="nav-btn" data-sec="tasks" onclick="openSection('tasks', this)"><span>Tasks (✓/✗)</span><span class="mini-pill" id="sbTaskPill">3d Trial</span></button>
+    <button class="nav-btn" data-sec="calendar" onclick="openSection('calendar', this)"><span>Exam Calendar</span><span class="mini-pill" id="sbCalPill">3d Trial</span></button>
+    <button class="nav-btn" data-sec="schedule" onclick="openSection('schedule', this)"><span>Mon–Sun Plan</span></button>
+    <button class="nav-btn" data-sec="pomodoro" onclick="openSection('pomodoro', this)"><span>Pomodoro</span></button>
+  </aside>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <strong id="welcomeText" style="font-size:15px;">Welcome, Student</strong>
+        <div id="planStatusText" style="font-size:12px;color:var(--muted);">Free Starter Plan • 7-Day Trial available for ₹1</div>
+      </div>
+      <div class="topbar-right">
+        <div class="xp-pill" onclick="openSection('rewards')" title="1,000 XP = Free 30-Day Pro Subscription">
+          <span>⚡</span><span id="topXpText">0 / 1000 XP</span>
+        </div>
+        <select id="themePicker" onchange="handleThemeSelect(this.value)" title="Choose Theme">
+          <option value="mono-dark">Theme: Monochrome Dark (Free)</option>
+          <option value="mono-light">Theme: Pure Paper Light (Free)</option>
+          <option value="liquid-glass">🔒 Liquid Glass (Pro)</option>
+          <option value="warm-sand">🔒 Warm Sand (Pro)</option>
+          <option value="graphite">🔒 Graphite Slate (Pro)</option>
+          <option value="deep-ink">🔒 Deep Ink (Pro)</option>
+        </select>
+        <button class="btn" id="authBtn" onclick="openModal('authModal')">Sign In</button>
+        <button class="btn btn-accent" id="upgradeBtn" onclick="openPlansPopup(true)">₹1 Trial / ₹99 Pro</button>
+      </div>
+    </header>
+
+    <!-- 1. 10 AI TOOLS -->
+    <section id="sec-hub" class="section active">
+      <div id="hubGridView">
+        <div class="sec-head">
+          <div>
+            <h1 class="sec-title">AI Study Suite</h1>
+            <p class="sec-sub">10 Groq-powered AI tools with 15-message memory — earn +15 XP on every solve.</p>
+          </div>
+          <div class="quota-badge" id="aiQuotaBadge">5 / 5 Free AI Uses Remaining</div>
+        </div>
+        <div class="bento">
+          <div class="card" onclick="openTool('doubt')"><span class="kicker">01 • Vision + Memory</span><h3>Photo-to-Doubt Solver</h3><p>Snap textbook questions for step-by-step Hinglish or English solutions and multi-step follow-ups.</p></div>
+          <div class="card" onclick="openTool('flashcards')"><span class="kicker">02 • Vision + Memory</span><h3>Notes to Flashcards</h3><p>Upload handwritten notebook pages to create interactive flip cards and MCQs.</p></div>
+          <div class="card" onclick="openTool('youtube')"><span class="kicker">03 • Lectures + Memory</span><h3>YouTube Summarizer</h3><p>Convert lectures into a 1-page cheat sheet and ask follow-up questions about the video.</p></div>
+          <div class="card" onclick="openTool('mocktest')"><span class="kicker">04 • Practice</span><h3>AI Mock Test</h3><p>Generate non-repeating chapter-wise JEE, NEET, or Board MCQ tests with instant scoring.</p></div>
+          <div class="card" onclick="openTool('podcast')"><span class="kicker">05 • 5–20 Min Podcast</span><h3>PDF Podcast with Tony Stark</h3><p>Turn NCERT chapters or notes into a 5–20 min Q&amp;A podcast hosted by Tony Stark and you.</p></div>
+          <div class="card" onclick="openTool('essay')"><span class="kicker">06 • Boards + Memory</span><h3>Essay &amp; Answer Grader</h3><p>Get predicted marks, step-marking feedback, and revision tracking across drafts.</p></div>
+          <div class="card" onclick="openTool('mindmap')"><span class="kicker">07 • Visual</span><h3>Concept Mind-Map</h3><p>Type any chapter to generate or expand a clean visual revision mind map.</p></div>
+          <div class="card" onclick="openTool('english')"><span class="kicker">08 • Voice + Memory</span><h3>Spoken English &amp; Interview</h3><p>Continuous multi-turn English and Interview practice with spoken AI voice replies.</p></div>
+          <div class="card" onclick="openTool('code')"><span class="kicker">09 • CS + Memory</span><h3>Coding Bug Fixer</h3><p>Debug Python, C++, or Java code across multi-step follow-up errors.</p></div>
+          <div class="card" onclick="openTool('aitimetable')"><span class="kicker">10 • Planning</span><h3>AI Timetable Builder</h3><p>Input exam date, weak chapters, and hours—and refine your plan anytime.</p></div>
+        </div>
+      </div>
+
+      <div id="toolWorkspace" style="display:none;">
+        <div class="tool-bar">
+          <button class="btn" onclick="closeTool()">← All 10 AI Tools</button>
+          <div class="tool-bar-right">
+            <span class="quota-badge" id="toolMemBadge">Memory: 0 / 15</span>
+            <button class="btn btn-danger" onclick="resetCurrentToolMemory()">Clear Memory</button>
+          </div>
+        </div>
+        <div id="toolContent" class="panel"></div>
+      </div>
+    </section>
+
+    <!-- 2. 3D CONCEPT VISUALIZATION LAB -->
+    <section id="sec-visual3d" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">3D Conceptual Diagram Studio</h1>
+          <p class="sec-sub">Enter any JEE, NEET, or Board topic — AI renders an interactive, rotatable 3D animated visualization for free.</p>
+        </div>
+        <div class="quota-badge">Free WebGL 3D Engine • +20 XP</div>
+      </div>
+      <div class="panel" style="margin-top:0;">
+        <div class="row-2" style="margin-bottom:10px;">
+          <select id="v3Subject">
+            <option>Physics</option><option>Physical Chemistry</option><option>Organic Chemistry</option>
+            <option>Inorganic Chemistry</option><option>Mathematics</option><option>Biology</option>
+          </select>
+          <input id="v3Topic" placeholder="e.g., Projectile Motion, sp3 Hybridization, Electric Dipole, Conic Sections..." />
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          <button class="btn btn-accent" onclick="runVisual3D()">Render Interactive 3D Model</button>
+          <button class="btn" onclick="quick3D('Physics','Projectile Motion Trajectory with Velocity Vectors')">Try: Projectile 3D</button>
+          <button class="btn" onclick="quick3D('Organic Chemistry','sp3 Tetrahedral Hybridization of Methane CH4')">Try: sp3 Methane 3D</button>
+          <button class="btn" onclick="quick3D('Physics','Electric Dipole and 3D Field Lines')">Try: Electric Dipole 3D</button>
+          <button class="btn" onclick="quick3D('Mathematics','3D Cone Slicing for Conic Sections')">Try: Conic Sections 3D</button>
+        </div>
+        <div id="v3Status" style="font-size:13px;color:var(--muted);">Drag inside the 3D canvas to rotate, scroll to zoom.</div>
+        <iframe id="v3Frame" class="visual3d-frame" sandbox="allow-scripts" title="3D Concept Visualization"></iframe>
+        <div id="v3Legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;"></div>
+        <div id="v3Explain" class="output">3D conceptual notes &amp; formula breakdown will appear here...</div>
+      </div>
+    </section>
+
+    <!-- 3. ALL CHAPTER NOTES -->
+    <section id="sec-notes" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">Complete Chapter Notes &amp; PDFs</h1>
+          <p class="sec-sub">All Class 10 &amp; Class 11 JEE chapters (Physics, Physical/Organic/Inorganic Chem, Maths) + high-weightage Class 12 chapters.</p>
+        </div>
+        <div class="quota-badge" id="notesCountBadge">93 Chapters Loaded</div>
+      </div>
+
+      <div class="panel" style="margin-top:0;">
+        <div class="row-3" style="margin-bottom:14px;">
+          <select id="curatedClass" onchange="renderCuratedNotes()">
+            <option value="ALL">All Classes (10, 11, 12)</option>
+            <option value="Class 11" selected>Class 11 JEE (All Chapters)</option>
+            <option value="Class 12">Class 12 (Important JEE/Board)</option>
+            <option value="Class 10">Class 10 (All Chapters)</option>
+          </select>
+          <select id="curatedSubject" onchange="renderCuratedNotes()">
+            <option value="ALL">All Subjects</option>
+            <option value="Physics">Physics</option>
+            <option value="Physical Chemistry">Physical Chemistry</option>
+            <option value="Organic Chemistry">Organic Chemistry</option>
+            <option value="Inorganic Chemistry">Inorganic Chemistry</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Science">Science (Class 10)</option>
+          </select>
+          <input id="curatedSearch" placeholder="Search chapter (e.g., Thermodynamics, Conic)..." oninput="renderCuratedNotes()" />
+        </div>
+        <div class="bento" id="curatedGrid"></div>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin-bottom:10px;">Your Personal Note Pad (Always Free)</h3>
+        <div class="row-2" style="margin-bottom:10px;">
+          <input id="myNoteTitle" placeholder="Note title (e.g., Rotational Motion Formulas)" />
+          <select id="myNoteTag"><option>Physics</option><option>Physical Chemistry</option><option>Organic Chemistry</option><option>Inorganic Chemistry</option><option>Mathematics</option><option>General</option></select>
+        </div>
+        <textarea id="myNoteBody" rows="3" style="width:100%;margin-bottom:10px;" placeholder="Write your own short notes, formulas, or mistakes to remember..."></textarea>
+        <button class="btn btn-accent" onclick="savePersonalNote()">Save Personal Note</button>
+        <div id="myNotesList" style="margin-top:16px;"></div>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin-bottom:10px;">Share Your Notes PDF with Community</h3>
+        <form id="noteUploadForm" class="form-grid">
+          <div class="row-2">
+            <input id="noteTitle" placeholder="Chapter Title" required />
+            <select id="noteClass"><option>Class 10</option><option selected>Class 11</option><option>Class 12</option></select>
+          </div>
+          <div class="row-2">
+            <input id="noteSubject" placeholder="Subject" required />
+            <input type="file" id="noteFile" accept=".pdf" required />
+          </div>
+          <button class="btn btn-accent" type="submit" style="justify-self:start;">Upload PDF</button>
+        </form>
+        <div id="communityNotesList" style="margin-top:14px;"></div>
+      </div>
+    </section>
+
+    <!-- 4. PYQ ARENA -->
+    <section id="sec-pyq" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">PYQ Arena (JEE &amp; NEET)</h1>
+          <p class="sec-sub">Chapter-wise Past Year Questions with Year, Date, Shift, Exam Probability %, Rough Work Pad &amp; auto Mistake Book.</p>
+        </div>
+        <div class="quota-badge">+25 XP per Correct PYQ</div>
+      </div>
+      <div class="panel" style="margin-top:0;">
+        <div class="row-3" style="margin-bottom:12px;">
+          <select id="pyqExam"><option>JEE Main</option><option>JEE Advanced</option><option>NEET</option></select>
+          <select id="pyqClass" onchange="populateChapterSelect('pyqClass','pyqSub','pyqChap')">
+            <option value="Class 11">Class 11</option><option value="Class 12">Class 12</option>
+          </select>
+          <select id="pyqSub" onchange="populateChapterSelect('pyqClass','pyqSub','pyqChap')">
+            <option>Physics</option><option>Physical Chemistry</option><option>Organic Chemistry</option>
+            <option>Inorganic Chemistry</option><option>Mathematics</option>
+          </select>
+        </div>
+        <div class="row-2" style="margin-bottom:12px;">
+          <select id="pyqChap"></select>
+          <select id="pyqCount"><option value="5">5 PYQs</option><option value="8">8 PYQs</option><option value="10">10 PYQs</option></select>
+        </div>
+        <button class="btn btn-accent" onclick="runPyqTest()">Start Real PYQ Test</button>
+        <div id="pyqArea" style="margin-top:14px;"></div>
+      </div>
+    </section>
+
+    <!-- 5. DPPs & DAILY PUZZLE -->
+    <section id="sec-dpp" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">Daily Practice Problems (DPPs) &amp; Puzzles</h1>
+          <p class="sec-sub">10–15 medium-to-high difficulty verified-style questions per chapter + Daily Concept Puzzle.</p>
+        </div>
+        <div class="quota-badge">+20 XP / DPP • +50 XP / Puzzle</div>
+      </div>
+
+      <div class="panel" style="margin-top:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+          <div>
+            <h3>Daily Concept Puzzle (+50 XP)</h3>
+            <p style="font-size:12.5px;color:var(--muted);">One tricky intuition puzzle daily to sharpen exam logic.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <select id="puzExam"><option>JEE</option><option>NEET</option><option>Boards</option></select>
+            <select id="puzSub"><option>Physics</option><option>Chemistry</option><option>Mathematics</option></select>
+            <button class="btn btn-accent" onclick="runDailyPuzzle()">Load Today's Puzzle</button>
+          </div>
+        </div>
+        <div id="puzzleArea"></div>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin-bottom:10px;">Chapter DPP Sheet (10–15 Medium to High Problems)</h3>
+        <div class="row-3" style="margin-bottom:12px;">
+          <select id="dppExam"><option>JEE Main &amp; Adv</option><option>NEET</option><option>Class 10–12 Boards</option></select>
+          <select id="dppClass" onchange="populateChapterSelect('dppClass','dppSub','dppChap')">
+            <option value="Class 11">Class 11</option><option value="Class 12">Class 12</option><option value="Class 10">Class 10</option>
+          </select>
+          <select id="dppSub" onchange="populateChapterSelect('dppClass','dppSub','dppChap')">
+            <option>Physics</option><option>Physical Chemistry</option><option>Organic Chemistry</option>
+            <option>Inorganic Chemistry</option><option>Mathematics</option><option>Science</option>
+          </select>
+        </div>
+        <div class="row-3" style="margin-bottom:12px;">
+          <select id="dppChap"></select>
+          <select id="dppDiff"><option>Medium to High</option><option>High (JEE Advanced / Olympiad)</option><option>Board Competency + Medium</option></select>
+          <select id="dppCount"><option value="10">10 Problems</option><option value="12" selected>12 Problems</option><option value="15">15 Problems</option></select>
+        </div>
+        <button class="btn btn-accent" onclick="runDppGenerator()">Generate Chapter DPP</button>
+        <div id="dppArea" style="margin-top:14px;"></div>
+      </div>
+    </section>
+
+    <!-- 6. XP REWARDS, PRO BONUS VAULT & MISTAKE BOOK -->
+    <section id="sec-rewards" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">XP Rewards &amp; Mistake Book</h1>
+          <p class="sec-sub">Collect 1,000 XP by solving PYQs, DPPs, Daily Puzzles &amp; Doubts to unlock a FREE 30-Day Pro Subscription.</p>
+        </div>
+        <div class="quota-badge" id="rewardXpBadge">0 / 1,000 XP</div>
+      </div>
+
+      <div class="panel" style="margin-top:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div>
+            <h3 id="xpHeadline">0 XP Collected</h3>
+            <p id="xpSubline" style="font-size:13px;color:var(--muted);margin-top:4px;">Earn 1,000 more XP to claim a free 30-day Pro Subscription.</p>
+          </div>
+          <button class="btn btn-accent" id="claimProBtn" onclick="claimXpReward()">🎁 Claim 30-Day Pro (1,000 XP)</button>
+        </div>
+        <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xpBarFill"></div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px;">
+          <span>• Correct PYQ: <strong>+25 XP</strong></span>
+          <span>• Correct DPP: <strong>+20 XP</strong></span>
+          <span>• Daily Puzzle: <strong>+50 XP</strong></span>
+          <span>• 3D Visual: <strong>+20 XP</strong></span>
+          <span>• AI Doubt / Tool: <strong>+15 XP</strong></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div>
+            <h3>Pro Bonus: Free Movies Website Access</h3>
+            <p style="font-size:12.5px;color:var(--muted);">Exclusive Pro perk — unlocks automatically with ₹1 Trial, ₹99 Pro, or 1,000 XP.</p>
+          </div>
+          <button class="btn btn-accent" onclick="revealMoviesPassword()">Reveal Website &amp; Password</button>
+        </div>
+        <div id="moviesVaultBox" class="output" style="display:none;margin-top:12px;"></div>
+      </div>
+
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+          <div>
+            <h3>Mistake Book (LogicBloom Style)</h3>
+            <p style="font-size:12.5px;color:var(--muted);">Every wrong PYQ or DPP question lands here automatically so you never repeat the same exam trap.</p>
+          </div>
+          <button class="btn btn-danger" onclick="clearMistakes()">Clear Mistake Book</button>
+        </div>
+        <div id="mistakeList"></div>
+      </div>
+    </section>
+
+    <!-- 7. LIVE CHAT -->
+    <section id="sec-chat" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">Live Student Chat</h1>
+          <p class="sec-sub">Ultra-low-ping real-time study lounge. <strong id="onlineCount">Connecting...</strong></p>
+        </div>
+        <div class="quota-badge">Always Free Forever</div>
+      </div>
+      <div class="panel" style="margin-top:0;">
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+          <select id="chatRoom"><option>JEE Doubts</option><option>NEET Prep</option><option>Class 10–12 Boards</option><option>General Study</option></select>
+          <input id="chatUser" placeholder="Your name" value="Student" />
+        </div>
+        <div class="chat-box" id="chatBox"></div>
+        <form onsubmit="sendChat(event)" style="display:flex;gap:10px;">
+          <input id="chatInput" placeholder="Ask a doubt or share a tip..." style="flex:1;" required />
+          <button class="btn btn-accent" type="submit">Send</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 8. DAILY TASKS -->
+    <section id="sec-tasks" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">Daily Task Manager</h1>
+          <p class="sec-sub">Track every goal with Right (✓ Done) or Wrong (✗ Missed).</p>
+        </div>
+        <div class="quota-badge" id="taskTrialBadge">3-Day Free Trial</div>
+      </div>
+      <div class="panel" style="margin-top:0;">
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <input id="taskInput" placeholder="e.g., Solve 30 Kinematics PYQs" style="flex:1;" />
+          <button class="btn btn-accent" onclick="addTask()">Add Task</button>
+        </div>
+        <div id="taskStats" style="font-size:13px;color:var(--muted);margin-bottom:12px;"></div>
+        <div id="taskList"></div>
+      </div>
+    </section>
+
+    <!-- 9. EXAM CALENDAR -->
+    <section id="sec-calendar" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">Exam Calendar &amp; Notifications</h1>
+          <p class="sec-sub">Schedule tests and revision alerts with browser notifications.</p>
+        </div>
+        <div class="quota-badge" id="calTrialBadge">3-Day Free Trial</div>
+      </div>
+      <div class="panel" style="margin-top:0;">
+        <div class="row-2" style="margin-bottom:12px;">
+          <input id="calTitle" placeholder="Event (e.g., Chemistry Mock Test)" />
+          <input type="datetime-local" id="calDateTime" />
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+          <button class="btn btn-accent" onclick="addReminder()">Save Reminder</button>
+          <button class="btn" onclick="enableBrowserNotifications()">Allow Notifications</button>
+        </div>
+        <div id="reminderList"></div>
+      </div>
+    </section>
+
+    <!-- 10. MON-SUN SCHEDULES -->
+    <section id="sec-schedule" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">Weekly Customizable Schedules</h1>
+          <p class="sec-sub">Set different timetables for Monday through Sunday with chapter notes.</p>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:0;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <button class="btn" onclick="applyPreset('JEE')">JEE Preset</button>
+          <button class="btn" onclick="applyPreset('NEET')">NEET Preset</button>
+          <button class="btn" onclick="applyPreset('BOARDS')">Boards Preset</button>
+        </div>
+        <div class="day-tabs" id="dayTabs"></div>
+        <div class="row-2" style="margin-bottom:10px;">
+          <input id="schTime" placeholder="Time (e.g., 6:00 PM - 8:00 PM)" />
+          <input id="schSubject" placeholder="Subject & Chapter" />
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <input id="schNote" placeholder="Chapter notes or page numbers..." style="flex:1;" />
+          <button class="btn btn-accent" onclick="addScheduleSlot()">+ Add Slot</button>
+        </div>
+        <div id="scheduleList"></div>
+      </div>
+    </section>
+
+    <!-- 11. POMODORO -->
+    <section id="sec-pomodoro" class="section">
+      <div class="sec-head">
+        <div>
+          <h1 class="sec-title">Pomodoro Focus</h1>
+          <p class="sec-sub">Quiet, distraction-free study intervals.</p>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:0;">
+        <div class="center-row">
+          <button class="btn" onclick="setPomo(25)">25m Focus</button>
+          <button class="btn" onclick="setPomo(50)">50m Deep Sprint</button>
+          <button class="btn" onclick="setPomo(5)">5m Break</button>
+          <button class="btn" onclick="setPomo(15)">15m Long Break</button>
+        </div>
+        <div class="pomo-clock" id="pomoDisplay">25:00</div>
+        <div class="center-row">
+          <button class="btn btn-accent" onclick="startPomo()">Start</button>
+          <button class="btn" onclick="pausePomo()">Pause</button>
+          <button class="btn" onclick="resetPomo()">Reset</button>
+          <input type="number" id="customPomo" placeholder="Min" style="width:90px;" />
+          <button class="btn" onclick="setPomo(Number(document.getElementById('customPomo').value)||25)">Set</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER: OLD WEBSITE AD BADGE + DEVELOPER CREDITS -->
+    <footer class="site-footer">
+      <a class="promo-badge" href="https://omni-typing-iq.vercel.app/" target="_blank" rel="noopener">
+        <span class="promo-tag">Check Out My First Website</span>
+        <span>Boost Your Speed on <strong>OmniTyping IQ</strong> (omni-typing-iq.vercel.app) ↗</span>
+      </a>
+      <div class="credits-line">
+        <strong>StudyDesk</strong> • Created by Developer <strong>Moulik Soni</strong>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<div class="xp-toast" id="xpToast">+25 XP!</div>
+
+<!-- HOURLY PLANS & PRO PERKS POPUP -->
+<div class="modal-bg" id="plansModal">
+  <div class="modal" style="max-width:520px;">
+    <span class="kicker">STUDYDESK PRO PLANS</span>
+    <h2 style="margin:6px 0 8px;">Upgrade Your Prep — ₹1 Trial or ₹99/mo</h2>
+    <p style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;">
+      Unlock everything instantly with UPI, or earn <strong>1,000 XP</strong> solving PYQs &amp; DPPs to claim 30 days FREE!
+    </p>
+    <div class="preview-sheet" style="margin:10px 0;">
+      <strong style="font-size:13.5px;">₹1 (7-Day Trial) &amp; ₹99 (30-Day Pro) Includes:</strong>
+      <ul style="margin:8px 0 0 18px;font-size:13px;color:var(--muted);line-height:1.75;">
+        <li>Unlimited access to all 10 AI Tools + Tony Stark 5–20 Min Podcasts</li>
+        <li>Full Class 10, Class 11 JEE &amp; Class 12 Chapter PDFs + JEE Notes Printer</li>
+        <li>Unlimited PYQ Arena, 10–15 Problem DPPs &amp; 3D Concept Visualizations</li>
+        <li>All 6 Minimalist Themes (Liquid Glass, Warm Sand, Graphite, Deep Ink)</li>
+        <li><strong style="color:var(--text);">Bonus: Password for the Free Movies Website included in Pro Plan</strong></li>
+      </ul>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+      <a href="index.html#checkout" class="btn btn-accent" style="flex:1;justify-content:center;">Unlock ₹1 Trial / ₹99 Pro</a>
+      <button class="btn" onclick="closeModal('plansModal')">Continue Free</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE / LOCKED FEATURE MODAL -->
+<div class="modal-bg" id="upgradeModal">
+  <div class="modal">
+    <span class="kicker">PRO FEATURE LOCKED</span>
+    <h2 id="upTitle" style="margin:6px 0 8px;">Unlock Full Access for ₹1</h2>
+    <p id="upDesc" style="font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:18px;">
+      Start a 7-day full Pro trial for ₹1 (or ₹99/mo — includes Password for the Free Movies Website), or reach 1,000 XP for a free 30-day Pro pass!
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="index.html#checkout" class="btn btn-accent" style="flex:1;justify-content:center;">Start ₹1 Trial / ₹99 Pro</a>
+      <button class="btn" onclick="closeModal('upgradeModal')">Maybe Later</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE PREVIEW MODAL -->
+<div class="modal-bg" id="previewModal">
+  <div class="modal" style="max-width:560px;">
+    <span class="kicker" id="prevMeta">CLASS 11 • PHYSICS</span>
+    <h2 id="prevTitle" style="margin:6px 0 4px;">Chapter Preview</h2>
+    <div class="preview-sheet">
+      <strong style="font-size:12px;color:var(--muted);">JEE / BOARD QUICK REVISION PREVIEW</strong>
+      <p id="prevText" style="margin-top:8px;font-size:13.5px;line-height:1.6;"></p>
+      <div class="blurred-page" id="prevBlurBlock">
+        <strong>Full Official Chapter PDF + JEE Short Notes Sheet</strong>
+        <p style="margin-top:6px;font-size:13px;">Complete derivations, JEE Main/Advanced formula tricks, reaction mechanisms, and printable chapter PDF...</p>
+      </div>
+    </div>
+    <div id="prevActions" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<!-- EMAIL & MOBILE OTP LOGIN MODAL -->
+<div class="modal-bg" id="authModal">
+  <div class="modal">
+    <h2 style="margin-bottom:4px;">Student Sign Up / Login</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Enter Name, Mobile &amp; Gmail to receive your 6-digit OTP.</p>
+    <div class="form-grid">
+      <input id="authName" placeholder="Full Name" />
+      <input id="authPhone" placeholder="10-Digit Mobile Number" maxlength="10" />
+      <input id="authEmail" type="email" placeholder="Gmail Address (OTP arrives here)" />
+      <button class="btn btn-accent" onclick="sendAuthOtp()">Send 6-Digit OTP</button>
+      <input id="authOtp" placeholder="Enter 6-digit OTP" maxlength="6" />
+      <button class="btn" onclick="verifyAuthOtp()">Verify OTP &amp; Log In</button>
+      <div id="authStatus" style="font-size:13px;color:var(--muted);"></div>
+      <button class="btn" onclick="closeModal('authModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = "http://127.0.0.1:8000";
+  const WS_BASE = API_BASE.replace(/^http/, "ws");
+  if (typeof mermaid !== "undefined") {
+    try { mermaid.initialize({ startOnLoad: false, theme: "dark" }); } catch (e) {}
+  }
+
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  function safeJson(key, fallback) {
+    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch { return fallback; }
+  }
+  function getLoggedInName() { return (localStorage.getItem("sd_user") || "").trim() || "Student"; }
+  function parseErr(d, fb = "Error communicating with server.") {
+    if (!d) return fb;
+    if (Array.isArray(d.detail)) return d.detail.map(x => (x.msg || "").replace("Value error, ", "")).join(" ");
+    return d.detail || fb;
+  }
+
+  // ========= PERSISTENT SESSION ID (15-MESSAGE MEMORY) =========
+  const SD_SESSION_ID = localStorage.getItem("sd_session_id") || (() => {
+    const id = "stu_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem("sd_session_id", id);
+    return id;
+  })();
+  const _origFetch = window.fetch;
+  window.fetch = function (input, init = {}) {
+    const url = typeof input === "string" ? input : (input && input.url) || "";
+    if (url.includes("/api/tools/")) {
+      const headers = new Headers(init.headers || {});
+      headers.set("X-Session-Id", SD_SESSION_ID);
+      init = { ...init, headers };
+    }
+    return _origFetch(input, init);
+  };
+
+  // ========= PRO & FREE TRIAL ENGINE =========
+  const FREE_AI_LIMIT = 5, FREE_TRIAL_DAYS = 3, FREE_THEMES = ["mono-dark", "mono-light"];
+  if (!localStorage.getItem("sd_trial_start")) localStorage.setItem("sd_trial_start", String(Date.now()));
+  function isPro() { return localStorage.getItem("sd_pro") === "true"; }
+  function getAiUsed() { return Number(localStorage.getItem("sd_ai_used") || "0"); }
+  function getTrialDaysLeft() { return Math.max(0, FREE_TRIAL_DAYS - Math.floor((Date.now() - Number(localStorage.getItem("sd_trial_start"))) / 86400000)); }
+  function openModal(id) { const el = document.getElementById(id); if (el) el.classList.add("open"); }
+  function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove("open"); }
+  function showUpgrade(title, desc) {
+    document.getElementById("upTitle").textContent = title;
+    document.getElementById("upDesc").textContent = desc;
+    openModal("upgradeModal");
+  }
+  function openPlansPopup(force = false) {
+    const last = Number(localStorage.getItem("sd_last_plan_popup") || "0");
+    if (force || (!isPro() && Date.now() - last >= 3600000)) {
+      localStorage.setItem("sd_last_plan_popup", String(Date.now()));
+      openModal("plansModal");
+    }
+  }
+  function consumeAiQuota() {
+    if (isPro()) return true;
+    const used = getAiUsed();
+    if (used >= FREE_AI_LIMIT) {
+      showUpgrade("5 Free AI Uses Completed", "Unlock unlimited AI with ₹1 Trial / ₹99 Pro (includes Free Movies Website Password), or earn 1,000 XP for 30 days FREE!");
+      return false;
+    }
+    localStorage.setItem("sd_ai_used", String(used + 1));
+    refreshPlanUI();
+    return true;
+  }
+  function check3DayTrial(featureName) {
+    if (isPro() || getTrialDaysLeft() > 0) return true;
+    showUpgrade(`${featureName} 3-Day Trial Ended`, `Unlock unlimited ${featureName} with ₹1 Trial / ₹99 Pro or by hitting 1,000 XP!`);
+    return false;
+  }
+  function refreshPlanUI() {
+    const pro = isPro(), left = Math.max(0, FREE_AI_LIMIT - getAiUsed()), days = getTrialDaysLeft();
+    document.getElementById("planStatusText").textContent = pro
+      ? `Pro Plan Active (Valid until ${localStorage.getItem("sd_pro_until") || "30 Days"})`
+      : `Free Starter • ${left}/5 AI tries left • ${days}d left on Tasks & Calendar`;
+    document.getElementById("aiQuotaBadge").textContent = pro ? "Pro Plan • Unlimited AI" : `${left} / 5 Free AI Uses Remaining`;
+    document.getElementById("sbAiPill").textContent = pro ? "PRO" : `${left} Left`;
+    document.getElementById("sbTaskPill").textContent = pro ? "PRO" : `${days}d Left`;
+    document.getElementById("sbCalPill").textContent = pro ? "PRO" : `${days}d Left`;
+    document.getElementById("taskTrialBadge").textContent = pro ? "Pro Unlimited" : `Free Trial: ${days} Day(s) Left`;
+    document.getElementById("calTrialBadge").textContent = pro ? "Pro Unlimited" : `Free Trial: ${days} Day(s) Left`;
+    if (pro) {
+      document.getElementById("upgradeBtn").textContent = "Pro Active";
+      [...document.getElementById("themePicker").options].forEach(o => { o.text = o.text.replace("🔒 ", "").replace("(Pro)", "(Unlocked)"); });
+    }
+  }
+  function handleThemeSelect(theme) {
+    if (!FREE_THEMES.includes(theme) && !isPro()) {
+      const current = localStorage.getItem("sd_theme") || "mono-dark";
+      document.getElementById("themePicker").value = FREE_THEMES.includes(current) ? current : "mono-dark";
+      showUpgrade("Pro Studio Theme Locked", "Monochrome Dark and Pure Paper Light are free. Unlock Liquid Glass, Warm Sand, Graphite Slate, and Deep Ink with ₹1 Trial / ₹99 Pro or 1,000 XP.");
+      return;
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("sd_theme", theme);
+    document.getElementById("themePicker").value = theme;
+  }
+
+  // ========= XP & 1,000 XP REWARD SYSTEM + PRO MOVIES VAULT + MISTAKE BOOK =========
+  const XP_TARGET = 1000;
+  let latestMoviesPassword = "";
+  function getXp() { return Number(localStorage.getItem("sd_xp") || "0"); }
+  function addXp(amount, label = "") {
+    const next = getXp() + amount;
+    localStorage.setItem("sd_xp", String(next));
+    refreshXpUI();
+    const toast = document.getElementById("xpToast");
+    toast.textContent = `+${amount} XP${label ? " • " + label : ""}`;
+    toast.style.display = "block";
+    clearTimeout(window._xpTimer);
+    window._xpTimer = setTimeout(() => { toast.style.display = "none"; }, 2200);
+  }
+  function refreshXpUI() {
+    const xp = getXp();
+    const pct = Math.min(100, Math.round((xp / XP_TARGET) * 100));
+    document.getElementById("topXpText").textContent = `${xp} / ${XP_TARGET} XP`;
+    document.getElementById("sbXpPill").textContent = `${xp} XP`;
+    document.getElementById("rewardXpBadge").textContent = `${xp} / ${XP_TARGET} XP`;
+    document.getElementById("xpHeadline").textContent = `${xp} XP Collected (${pct}%)`;
+    document.getElementById("xpBarFill").style.width = `${pct}%`;
+    const remain = Math.max(0, XP_TARGET - xp);
+    document.getElementById("xpSubline").textContent = remain === 0
+      ? "Goal reached! Click Claim to unlock your FREE 30-Day Pro Subscription right now."
+      : `Earn ${remain} more XP from PYQs, DPPs, Daily Puzzles & AI Doubts to unlock 30 Days of Pro FREE!`;
+    document.getElementById("claimProBtn").style.opacity = remain === 0 ? "1" : "0.6";
+  }
+  function claimXpReward() {
+    const xp = getXp();
+    if (xp < XP_TARGET) {
+      alert(`You need ${XP_TARGET - xp} more XP to unlock the free 30-day Pro Subscription! Solve PYQs (+25 XP), DPPs (+20 XP), and Daily Puzzles (+50 XP).`);
+      return;
+    }
+    localStorage.setItem("sd_xp", String(xp - XP_TARGET));
+    localStorage.setItem("sd_pro", "true");
+    const expiry = new Date(Date.now() + 30 * 86400000).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    localStorage.setItem("sd_pro_until", expiry);
+    refreshXpUI();
+    refreshPlanUI();
+    renderCuratedNotes();
+    alert(`Congratulations! 30-Day Pro Subscription activated until ${expiry}!`);
+  }
+  function copyMoviesPass() {
+    if (!latestMoviesPassword) return;
+    navigator.clipboard.writeText(latestMoviesPassword).then(() => alert("Password copied!")).catch(() => alert("Password: " + latestMoviesPassword));
+  }
+  async function revealMoviesPassword() {
+    const box = document.getElementById("moviesVaultBox");
+    if (!isPro()) {
+      showUpgrade("Pro Bonus Locked", "Start the ₹1 7-Day Trial, ₹99 Pro Plan, or reach 1,000 XP to unlock the Free Movies Website password.");
+      return;
+    }
+    box.style.display = "block";
+    box.textContent = "Verifying Pro access...";
+    const email = encodeURIComponent(localStorage.getItem("sd_email") || "");
+    try {
+      const r = await fetch(`${API_BASE}/api/pro/movies-pass?email=${email}&xp_pro=true`);
+      const d = await r.json();
+      if (!r.ok) { box.textContent = parseErr(d); return; }
+      latestMoviesPassword = d.password || "";
+      box.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;">
+        <div><strong>Website:</strong> <a href="${esc(d.site_url)}" target="_blank" rel="noopener" style="color:var(--text);">${esc(d.site_url)} ↗</a></div>
+        <div><strong>Password:</strong> <code style="padding:3px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);">${esc(d.password)}</code></div>
+        <div><button class="btn" onclick="copyMoviesPass()">Copy Password</button></div>
+      </div>`;
+    } catch {
+      box.textContent = "Cannot reach Python backend. Make sure uvicorn is running.";
+    }
+  }
+
+  let mistakes = safeJson("sd_mistakes", []);
+  function saveMistake(subject, chapter, question, rightAns, explanation) {
+    if (mistakes.some(m => m.q === question)) return;
+    mistakes.unshift({ subject, chapter, q: question, ans: rightAns, exp: explanation, date: new Date().toLocaleDateString() });
+    mistakes = mistakes.slice(0, 60);
+    localStorage.setItem("sd_mistakes", JSON.stringify(mistakes));
+    renderMistakes();
+  }
+  function clearMistakes() {
+    mistakes = [];
+    localStorage.setItem("sd_mistakes", "[]");
+    renderMistakes();
+  }
+  function renderMistakes() {
+    const el = document.getElementById("mistakeList");
+    if (!mistakes.length) {
+      el.innerHTML = `<p style="font-size:13px;color:var(--muted);">No mistakes recorded yet — solve PYQs or DPPs to track weak spots automatically.</p>`;
+      return;
+    }
+    el.innerHTML = mistakes.map((m, i) => `
+      <div class="q-card">
+        <div class="q-tags"><span class="q-tag">${esc(m.subject)}</span><span class="q-tag">${esc(m.chapter)}</span><span class="q-tag">${esc(m.date)}</span></div>
+        <div style="font-size:13.5px;font-weight:600;margin-bottom:6px;">${esc(m.q)}</div>
+        <div style="font-size:12.5px;color:var(--ok);margin-bottom:4px;">Correct Answer: ${esc(m.ans)}</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">${esc(m.exp)}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" onclick="explainMistakeWithAI(${i})">Teach Me This Concept (AI)</button>
+          <button class="btn btn-danger" onclick="mistakes.splice(${i},1);localStorage.setItem('sd_mistakes',JSON.stringify(mistakes));renderMistakes()">Mastered ✓</button>
+        </div>
+      </div>`).join("");
+  }
+  function explainMistakeWithAI(idx) {
+    const m = mistakes[idx];
+    openSection("hub");
+    openTool("doubt");
+    document.getElementById("tQ").value = `I got this ${m.subject} (${m.chapter}) question wrong. Teach me the concept simply and why the trap happens:\n${m.q}\nCorrect answer: ${m.ans}`;
+  }
+
+  // ========= NAVIGATION =========
+  function openSection(id, btn) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    const target = document.getElementById("sec-" + id);
+    if (target) target.classList.add("active");
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    const navTarget = btn || document.querySelector(`.nav-btn[data-sec="${id}"]`);
+    if (navTarget) navTarget.classList.add("active");
+    if (id === "notes") loadCommunityNotes();
+    if (id === "chat") connectChat();
+    if (id === "rewards") { refreshXpUI(); renderMistakes(); }
+  }
+
+  // ========= ALL 93 CURATED CHAPTER NOTES =========
+  const RAW_CHAPTERS = [
+    ["Class 11","Physics","Ch 1: Units and Measurements","keph101","SI Base Units, Dimensional Analysis ([F]=MLT^-2, [E]=ML^2T^-2), Vernier Callipers & Screw Gauge zero errors, significant figures, error propagation."],
+    ["Class 11","Physics","Ch 2: Motion in a Straight Line","keph102","v=u+at, s=ut+1/2at^2, v^2-u^2=2as, Sn=u+a/2(2n-1). Calculus kinematics (v=dx/dt, a=vdv/dx), relative velocity in 1D, x-t and v-t area/slope traps."],
+    ["Class 11","Physics","Ch 3: Motion in a Plane","keph103","Vectors (dot & cross product), Projectile Motion (T=2u sinθ/g, H=u^2 sin^2θ/2g, R=u^2 sin2θ/g), River-Boat, Rain-Man, Uniform Circular Motion (ac=v^2/R)."],
+    ["Class 11","Physics","Ch 4: Laws of Motion","keph104","Newton's 3 Laws, FBD, Pulley & Wedge constraints, Pseudo Force in non-inertial frames, Static & Kinetic Friction (f<=μN), Banking of Roads."],
+    ["Class 11","Physics","Ch 5: Work, Energy and Power","keph105","Work-Energy Theorem (W_all = ΔK), Conservative vs Non-Conservative forces, Vertical Circular Motion (v_bottom >= √5gR), Elastic & Inelastic Collisions (e)."],
+    ["Class 11","Physics","Ch 6: System of Particles & Rotational Motion","keph106","Centre of Mass, Moment of Inertia (Parallel & Perpendicular Axis Theorems), Torque τ=r×F=Iα, Rolling without slipping (v=ωR), Angular Momentum Conservation."],
+    ["Class 11","Physics","Ch 7: Gravitation","keph107","Kepler's Laws, g_h & g_d variations, Gravitational Potential & Field of Shell/Solid Sphere, Escape Velocity (√2gR), Orbital Velocity & Satellite Energy."],
+    ["Class 11","Physics","Ch 8: Mechanical Properties of Solids","keph201","Hooke's Law, Young's/Bulk/Shear Modulus, Stress-Strain curve, Elastic Potential Energy density (1/2 × Stress × Strain), Thermal stress."],
+    ["Class 11","Physics","Ch 9: Mechanical Properties of Fluids","keph202","Pascal's Law, Archimedes Buoyancy, Continuity Equation (A1v1=A2v2), Bernoulli's Theorem, Torricelli's Law, Viscosity (Stokes Law), Surface Tension & Excess Pressure."],
+    ["Class 11","Physics","Ch 10: Thermal Properties of Matter","keph203","Linear/Area/Volume expansion (β=2α, γ=3α), Calorimetry, Heat Conduction (Fourier's Law), Stefan-Boltzmann Law (E=eσAT^4), Wien's Law, Newton's Cooling."],
+    ["Class 11","Physics","Ch 11: Thermodynamics","keph204","First Law (ΔQ=ΔU+ΔW), Isothermal, Adiabatic (PV^γ=const), Isobaric, Isochoric work & molar heat capacities (Cp-Cv=R), Carnot Efficiency (1 - T2/T1)."],
+    ["Class 11","Physics","Ch 12: Kinetic Theory of Gases","keph205","Ideal gas pressure P=1/3 ρ v_rms^2, v_rms = √(3RT/M), Degrees of freedom (f=3,5,6), Equipartition of Energy (U=f/2 nRT), Mean Free Path."],
+    ["Class 11","Physics","Ch 13: Oscillations (SHM)","keph206","x=A sin(ωt+φ), v=ω√(A^2-x^2), a=-ω^2x, Spring combinations (series/parallel), Simple & Physical Pendulum, Superposition & Phasor method for SHM."],
+    ["Class 11","Physics","Ch 14: Waves","keph207","Travelling wave y=A sin(ωt-kx), Speed on string v=√(T/μ), Laplace sound correction, Standing Waves, Organ Pipes (Open/Closed), Beats & Doppler Effect."],
+    ["Class 11","Physical Chemistry","Ch 1: Some Basic Concepts (Mole Concept)","kech101","Mole conversions, Stoichiometry, Limiting Reagent, Empirical/Molecular Formula, Concentration terms (Molarity, Molality, Mole Fraction, %w/w), POAC."],
+    ["Class 11","Physical Chemistry","Ch 2: Structure of Atom","kech102","Photoelectric Effect (hν=W0+Kmax), Bohr Model (r_n=0.529 n^2/Z Å, E_n=-13.6 Z^2/n^2 eV), Hydrogen Spectrum, de Broglie λ=h/p, Heisenberg, Quantum Numbers, Nodes."],
+    ["Class 11","Physical Chemistry","Ch 5: Chemical Thermodynamics","kech105","First Law (ΔU=q+w, chemistry sign convention), Enthalpy ΔH=ΔU+ΔngRT, Hess's Law, Bond Enthalpy, Entropy ΔS, Gibbs Energy ΔG=ΔH-TΔS=-RT lnK."],
+    ["Class 11","Physical Chemistry","Ch 6: Equilibrium (Chemical & Ionic)","kech106","Kp=Kc(RT)^Δng, Le Chatelier Principle, Ostwald Dilution Law, pH of Weak Acids/Bases, Buffer (Henderson Eq), Salt Hydrolysis, Solubility Product (Ksp) & Common Ion."],
+    ["Class 11","Physical Chemistry","Ch 7: Redox Reactions & Equivalent Concept","kech201","Oxidation numbers, Balancing by Ion-Electron & Oxidation Number methods, n-factor calculations, Law of Equivalence, Disproportionation & Back Titration."],
+    ["Class 11","Inorganic Chemistry","Ch 3: Classification & Periodicity","kech103","Atomic/Ionic Radius trends, Ionization Enthalpy anomalies (Be>B, N>O), Electron Gain Enthalpy (Cl>F), Electronegativity, Diagonal Relationship, Oxide nature."],
+    ["Class 11","Inorganic Chemistry","Ch 4: Chemical Bonding & Molecular Structure","kech104","VSEPR shapes & bond angles, Hybridization, Dipole Moment, Fajans Rules, Molecular Orbital Theory (MOT bond order, O2 paramagnetic), H-Bonding & Back Bonding."],
+    ["Class 11","Inorganic Chemistry","JEE Special: p-Block Elements (Group 13 & 14)","kech103","Inert Pair Effect (Tl+, Pb2+), Borax, Diborane (3c-2e banana bond), Boric Acid, Allotropes of Carbon, Silicones & Silicates — high-yield JEE Inorganic trends."],
+    ["Class 11","Organic Chemistry","Ch 8: Organic Chemistry — GOC, IUPAC & Isomerism","kech202","IUPAC Nomenclature, Structural & Geometrical/Optical Isomerism, Electronic Effects (Inductive, Resonance, Hyperconjugation), Carbocation/Carbanion/Radical stability, Acid-Base strength."],
+    ["Class 11","Organic Chemistry","Ch 9: Hydrocarbons (Alkanes, Alkenes, Alkynes, Benzene)","kech203","Wurtz, Kolbe, Free Radical Halogenation, Conformations of Ethane, Markovnikov & Anti-Markovnikov (Peroxide), Ozonolysis, Acidic Alkynes, Electrophilic Aromatic Substitution (EAS)."],
+    ["Class 11","Mathematics","Ch 1: Sets","kemh101","Roster & Set-Builder form, Subsets (2^n), Power Set, Venn Diagrams, De Morgan's Laws, Cardinality n(A∪B∪C) formulas."],
+    ["Class 11","Mathematics","Ch 2: Relations and Functions","kemh102","Domain, Codomain, Range, Number of relations (2^mn), Modulus, Signum, Greatest Integer [x], Fractional Part {x}, Graphical transformations."],
+    ["Class 11","Mathematics","Ch 3: Trigonometric Functions","kemh103","Compound angles, Transformation (C-D) formulas, Multiple/Sub-multiple angles, Maximum/Minimum of a sinθ+b cosθ, General Solutions of Trigonometric Equations."],
+    ["Class 11","Mathematics","Ch 4: Complex Numbers & Quadratic Equations","kemh104","Argand plane, Modulus & Argument properties, Cube Roots of Unity (1, ω, ω^2), Rotation Theorem, Quadratic Roots, Location of Roots & Common Roots."],
+    ["Class 11","Mathematics","Ch 5: Linear Inequalities","kemh105","Wavy Curve Method for rational inequalities, Modulus inequalities, AM-GM inequality applications for JEE optimization."],
+    ["Class 11","Mathematics","Ch 6: Permutations and Combinations","kemh106","Fundamental Principle of Counting, Gap & String methods, Circular Permutations, Identical objects distribution (Beggar's Method n+r-1Cr-1), Derangements."],
+    ["Class 11","Mathematics","Ch 7: Binomial Theorem","kemh107","General Term Tr+1=nCr x^(n-r) y^r, Middle Term, Numerically Greatest Term, Multinomial Theorem, Properties of Binomial Coefficients, Remainder problems."],
+    ["Class 11","Mathematics","Ch 8: Sequences and Series","kemh108","AP, GP, AGP, Infinite GP, AM >= GM >= HM inequality, Method of Differences (Telescoping Series), Σn, Σn^2, Σn^3."],
+    ["Class 11","Mathematics","Ch 9: Straight Lines","kemh109","Slope, All 5 line forms, Distance of point from line, Angle bisectors, Centroid/Incentre/Orthocentre/Circumcentre, Family of Lines, Pair of Straight Lines."],
+    ["Class 11","Mathematics","Ch 10: Conic Sections (Circle, Parabola, Ellipse, Hyperbola)","kemh110","Circle tangents/chords/radical axis; Parabola y^2=4ax parametric (at^2,2at), focal chord; Ellipse & Hyperbola eccentricity, auxiliary circle, asymptotes."],
+    ["Class 11","Mathematics","Ch 11: Introduction to 3D Geometry","kemh111","Octants, 3D Distance Formula, Section Formula (Internal & External), Centroid of 3D triangle & tetrahedron."],
+    ["Class 11","Mathematics","Ch 12: Limits and Derivatives","kemh112","Indeterminate forms (0/0, ∞/∞, 1^∞), Standard Trig/Log/Exp limits, Sandwich Theorem, L'Hopital Rule, First Principle, Product/Quotient/Chain Rules."],
+    ["Class 11","Mathematics","Ch 13: Statistics","kemh113","Mean, Median, Mode, Mean Deviation, Variance σ^2 = (Σxi^2/n) - x̄^2, Standard Deviation, Combined Variance — guaranteed 4 marks in JEE Main."],
+    ["Class 11","Mathematics","Ch 14: Probability","kemh114","Sample Space, Mutually Exclusive & Exhaustive Events, Addition Theorem P(A∪B), Odds in favor/against, Classical & PnC-based probability."],
+    ["Class 12","Physics","Ch 1: Electric Charges and Fields","leph101","Coulomb's Law, Electric Field of Ring/Rod/Dipole, Electric Flux & Gauss's Law (infinite wire, sheet, sphere)."],
+    ["Class 12","Physics","Ch 2: Electrostatic Potential & Capacitance","leph102","Potential V=kq/r, E=-dV/dr, Equipotential Surfaces, Parallel Plate Capacitor with Dielectrics, RC Circuits & Energy Redistribution."],
+    ["Class 12","Physics","Ch 3: Current Electricity","leph103","Drift Velocity, Ohm's Law, Kirchhoff's KCL/KVL, Symmetry Circuits, Wheatstone Bridge, Meter Bridge, Potentiometer, Galvanometer to Ammeter/Voltmeter."],
+    ["Class 12","Physics","Ch 4: Moving Charges and Magnetism","leph104","Biot-Savart Law, Ampere's Circuital Law, Lorentz Force F=q(E+v×B), Helical path, Force between parallel wires, Torque on current loop."],
+    ["Class 12","Physics","Ch 6: Electromagnetic Induction (EMI)","leph106","Faraday's & Lenz's Law, Motional EMF (Blv & rotating rod 1/2 BωL^2), Self & Mutual Inductance, LR Growth/Decay circuits."],
+    ["Class 12","Physics","Ch 9: Ray Optics & Optical Instruments","leph201","Mirror & Lens Maker Formula, Total Internal Reflection (TIR), Prism minimum deviation, Combination of lenses, Compound Microscope & Telescope."],
+    ["Class 12","Physics","Ch 11: Dual Nature of Radiation & Matter","leph203","Einstein's Photoelectric Equation, Stopping Potential graphs, de Broglie wavelength of accelerated electrons (12.27/√V Å)."],
+    ["Class 12","Physics","Ch 12: Atoms & Nuclei (Modern Physics)","leph204","Bohr transitions, X-rays (Moseley's Law), Mass Defect & Binding Energy, Radioactivity decay law N=N0 e^(-λt) — highest ROI JEE unit."],
+    ["Class 12","Physics","Ch 14: Semiconductor Electronics","leph206","p-n Junction Diode, Half & Full Wave Rectifier, Zener Voltage Regulator, Logic Gates (AND, OR, NAND, NOR, XOR) — guaranteed JEE Main Q."],
+    ["Class 12","Physical Chemistry","Ch 1: Solutions","lech101","Henry's & Raoult's Law, Ideal vs Non-Ideal Azeotropes, Colligative Properties (RLVP, ΔTb, ΔTf, π=iCRT) & van't Hoff factor i."],
+    ["Class 12","Physical Chemistry","Ch 2: Electrochemistry","lech102","Nernst Equation, ΔG°=-nFE°, Kohlrausch's Law of Independent Migration, Faraday's Laws of Electrolysis, Conductance & Batteries."],
+    ["Class 12","Physical Chemistry","Ch 3: Chemical Kinetics","lech103","Order vs Molecularity, Zero & First Order integrated rate laws (t1/2=0.693/k), Arrhenius Equation k=Ae^(-Ea/RT), Collision Theory."],
+    ["Class 12","Inorganic Chemistry","Ch 4: d- and f-Block Elements","lech104","Electronic configs (Cr, Cu), Magnetic moment √n(n+2), KMnO4 & K2Cr2O7 oxidizing reactions, Lanthanoid Contraction."],
+    ["Class 12","Inorganic Chemistry","Ch 5: Coordination Compounds","lech105","IUPAC naming, Werner's Theory, Isomerism (Geometrical & Optical), VBT, Crystal Field Theory (CFT Δo, Δt), Spectrochemical Series, Metal Carbonyls."],
+    ["Class 12","Organic Chemistry","Ch 6: Haloalkanes & Haloarenes","lech201","SN1 vs SN2 mechanisms & stereochemistry, E1 vs E2 (Zaitsev/Hofmann), Grignard Reagents, Wurtz-Fittig, Sandmeyer & Aryl halide reactivity."],
+    ["Class 12","Organic Chemistry","Ch 7: Alcohols, Phenols & Ethers","lech202","Lucas Test, Hydroboration-Oxidation, Reimer-Tiemann, Kolbe's Reaction, Williamson Ether Synthesis, HI cleavage of ethers."],
+    ["Class 12","Organic Chemistry","Ch 8: Aldehydes, Ketones & Carboxylic Acids","lech203","Nucleophilic Addition, Aldol & Cross-Aldol, Cannizzaro, Haloform (Iodoform), Tollens/Fehling tests, Clemmensen/Wolff-Kishner, HVZ Reaction."],
+    ["Class 12","Organic Chemistry","Ch 9: Amines","lech204","Basicity order in gas vs aqueous phase, Gabriel Phthalimide, Hofmann Bromamide, Carbylamine test, Hinsberg test, Diazonium Salts."],
+    ["Class 12","Organic Chemistry","Ch 10: Biomolecules","lech205","Glucose & Fructose cyclic structures, Reducing/Non-reducing sugars, Amino Acids (Zwitterion, Isoelectric point), Proteins, DNA/RNA & Vitamins."],
+    ["Class 12","Mathematics","Ch 3 & 4: Matrices & Determinants","lemh103","Matrix multiplication, Symmetric/Skew-Symmetric, Adjoint properties |adj A|=|A|^(n-1), Inverse, Cramer's Rule & System of Linear Equations."],
+    ["Class 12","Mathematics","Ch 5: Continuity & Differentiability","lemh105","LHL=RHL=f(a), Differentiability, Implicit/Logarithmic/Parametric differentiation, Rolle's & Lagrange Mean Value Theorems."],
+    ["Class 12","Mathematics","Ch 6: Application of Derivatives (AOD)","lemh106","Rate of change, Increasing/Decreasing functions, Maxima & Minima (First & Second Derivative tests), Tangent/Normal applications."],
+    ["Class 12","Mathematics","Ch 7: Integrals (Indefinite & Definite)","lemh201","Substitution, Integration by Parts (ILATE), Partial Fractions, King's Property, Wallis Formula, Leibniz Rule for differentiating under integral."],
+    ["Class 12","Mathematics","Ch 9: Differential Equations","lemh203","Order & Degree, Variable Separable, Homogeneous, Linear Differential Equation (Integrating Factor e^∫Pdx), Bernoulli Equation."],
+    ["Class 12","Mathematics","Ch 10: Vector Algebra","lemh204","Dot & Cross Product, Projection, Scalar Triple Product [a b c] (Volume of parallelepiped), Vector Triple Product a×(b×c)."],
+    ["Class 12","Mathematics","Ch 11: Three Dimensional Geometry","lemh205","Direction Cosines & Ratios, Line equation in 3D, Angle & Shortest Distance between Skew Lines, Image of point in a line."],
+    ["Class 12","Mathematics","Ch 13: Probability (Conditional & Bayes)","lemh207","Conditional Probability P(A|B), Independent Events, Total Probability Theorem, Bayes' Theorem, Random Variables & Binomial Distribution."],
+    ["Class 10","Science","Ch 1: Chemical Reactions & Equations","jesc101","Balancing equations, Combination, Decomposition, Displacement, Double Displacement, Oxidation-Reduction, Corrosion & Rancidity."],
+    ["Class 10","Science","Ch 2: Acids, Bases and Salts","jesc102","Indicators, pH scale, Chlor-alkali process, Bleaching Powder, Baking Soda, Washing Soda, Plaster of Paris (CaSO4.1/2H2O)."],
+    ["Class 10","Science","Ch 3: Metals and Non-metals","jesc103","Reactivity Series, Ionic bonding properties, Extraction of Metals (Roasting, Calcination, Electrolytic Refining), Alloys & Corrosion prevention."],
+    ["Class 10","Science","Ch 4: Carbon and its Compounds","jesc104","Catenation, Tetravalency, Homologous Series, Functional Groups & IUPAC naming, Ethanol & Ethanoic Acid reactions, Esterification, Soaps vs Detergents."],
+    ["Class 10","Science","Ch 5: Life Processes","jesc105","Photosynthesis, Human Digestive System, Aerobic vs Anaerobic Respiration, Double Circulation in Heart, Nephron & Excretion."],
+    ["Class 10","Science","Ch 6: Control and Coordination","jesc106","Neuron & Reflex Arc, Human Brain parts, Plant Tropisms & Phytohormones (Auxin, Gibberellin, Cytokinin, ABA), Endocrine Hormones."],
+    ["Class 10","Science","Ch 7: How do Organisms Reproduce?","jesc107","Asexual modes (Fission, Budding, Regeneration, Spore, Vegetative), Flower Pollination & Fertilization, Human Reproductive System & Contraception."],
+    ["Class 10","Science","Ch 8: Heredity","jesc108","Mendel's Monohybrid (3:1) & Dihybrid (9:3:3:1) crosses, Law of Dominance/Segregation/Independent Assortment, Sex Determination (XX/XY)."],
+    ["Class 10","Science","Ch 9: Light – Reflection & Refraction","jesc109","Ray diagrams for Concave/Convex Mirrors & Lenses, Mirror Formula (1/v+1/u=1/f), Lens Formula (1/v-1/u=1/f), Snell's Law, Power P=1/f(m)."],
+    ["Class 10","Science","Ch 10: The Human Eye & Colourful World","jesc110","Myopia, Hypermetropia, Presbyopia corrections, Prism Dispersion, Rainbow formation, Atmospheric Refraction (Twinkling stars), Tyndall Scattering."],
+    ["Class 10","Science","Ch 11: Electricity","jesc111","Ohm's Law V=IR, Resistivity R=ρL/A, Series & Parallel Resistors, Joule's Law of Heating H=I^2Rt, Electric Power P=VI=I^2R=V^2/R, 1 kWh."],
+    ["Class 10","Science","Ch 12: Magnetic Effects of Electric Current","jesc112","Field lines around straight wire, circular loop & solenoid, Right-Hand Thumb Rule, Fleming's Left-Hand Rule, Domestic AC circuits & Fuse."],
+    ["Class 10","Science","Ch 13: Our Environment","jesc113","Ecosystem components, Food Chains & 10% Energy Law, Biological Magnification, Ozone Layer depletion (CFCs), Biodegradable waste."],
+    ["Class 10","Mathematics","Ch 1: Real Numbers","jemh101","Fundamental Theorem of Arithmetic, HCF(a,b)×LCM(a,b)=a×b, Irrationality proofs of √2, √3, √5."],
+    ["Class 10","Mathematics","Ch 2: Polynomials","jemh102","Geometrical meaning of zeroes, Relationship between zeroes and coefficients (α+β=-b/a, αβ=c/a)."],
+    ["Class 10","Mathematics","Ch 3: Pair of Linear Equations in Two Variables","jemh103","Graphical consistency conditions (a1/a2, b1/b2, c1/c2), Substitution & Elimination methods, Word problems."],
+    ["Class 10","Mathematics","Ch 4: Quadratic Equations","jemh104","Factorisation, Quadratic Formula x=(-b±√D)/2a, Discriminant D=b^2-4ac & Nature of Roots."],
+    ["Class 10","Mathematics","Ch 5: Arithmetic Progressions (AP)","jemh105","nth term an=a+(n-1)d, Sum of n terms Sn=n/2[2a+(n-1)d]=n/2(a+l), Selection of 3 terms (a-d, a, a+d)."],
+    ["Class 10","Mathematics","Ch 6: Triangles","jemh106","Basic Proportionality Theorem (Thales / BPT) & Converse, Similarity Criteria (AAA, SSS, SAS)."],
+    ["Class 10","Mathematics","Ch 7: Coordinate Geometry","jemh107","Distance Formula √[(x2-x1)^2+(y2-y1)^2], Section Formula, Mid-Point Formula, Collinearity & Quadrilaterals."],
+    ["Class 10","Mathematics","Ch 8: Introduction to Trigonometry","jemh108","Trigonometric Ratios (sin, cos, tan, cosec, sec, cot), Standard Values (0°,30°,45°,60°,90°), Three Fundamental Identities."],
+    ["Class 10","Mathematics","Ch 9: Some Applications of Trigonometry","jemh109","Angle of Elevation, Angle of Depression, Line of Sight — Heights and Distances word problems."],
+    ["Class 10","Mathematics","Ch 10: Circles","jemh110","Tangent perpendicular to radius at point of contact, Equal lengths of tangents drawn from an external point."],
+    ["Class 10","Mathematics","Ch 11: Areas Related to Circles","jemh111","Area of Sector (θ/360 × πr^2), Length of Arc (θ/360 × 2πr), Area of Segment (Sector − Triangle)."],
+    ["Class 10","Mathematics","Ch 12: Surface Areas and Volumes","jemh112","CSA, TSA & Volume of combinations of Cube, Cuboid, Cylinder, Cone, Sphere & Hemisphere."],
+    ["Class 10","Mathematics","Ch 13: Statistics","jemh113","Grouped Data Mean (Direct, Assumed Mean, Step-Deviation), Mode & Median formulas, Empirical relation: 3 Median = Mode + 2 Mean."],
+    ["Class 10","Mathematics","Ch 14: Probability","jemh114","P(E) = Favourable / Total outcomes, Complementary event P(E)+P(not E)=1, Coins, Dice & 52 Playing Cards."]
+  ];
+
+  const CURATED_NOTES = RAW_CHAPTERS.map(([cls, sub, title, code, preview]) => ({
+    cls, sub, title, url: `https://ncert.nic.in/textbook/pdf/${code}.pdf`, preview
+  }));
+
+  function renderCuratedNotes() {
+    const cls = document.getElementById("curatedClass").value;
+    const sub = document.getElementById("curatedSubject").value;
+    const q = (document.getElementById("curatedSearch").value || "").toLowerCase().trim();
+    const list = CURATED_NOTES.filter(n =>
+      (cls === "ALL" || n.cls === cls) &&
+      (sub === "ALL" || n.sub === sub) &&
+      (!q || n.title.toLowerCase().includes(q) || n.preview.toLowerCase().includes(q) || n.sub.toLowerCase().includes(q))
+    );
+    document.getElementById("notesCountBadge").textContent = `${list.length} / ${CURATED_NOTES.length} Chapters`;
+    const unlocked = isPro();
+    document.getElementById("curatedGrid").innerHTML = list.length ? list.map(n => `
+      <div class="card" onclick="openNotePreview(${CURATED_NOTES.indexOf(n)})">
+        <span class="kicker">${esc(n.cls)} • ${esc(n.sub)} ${unlocked ? "• PDF READY" : "• 🔒 PREVIEW"}</span>
+        <h3>${esc(n.title)}</h3>
+        <p>${esc(n.preview.slice(0, 92))}...</p>
+      </div>`).join("") : `<p style="color:var(--muted);font-size:13.5px;">No chapters match your filter.</p>`;
+  }
+
+  function openNotePreview(idx) {
+    const n = CURATED_NOTES[idx];
+    const unlocked = isPro();
+    document.getElementById("prevMeta").textContent = `${n.cls} • ${n.sub} • Verified Chapter PDF`;
+    document.getElementById("prevTitle").textContent = n.title;
+    document.getElementById("prevText").textContent = n.preview;
+    document.getElementById("prevBlurBlock").style.display = unlocked ? "none" : "block";
+    document.getElementById("prevActions").innerHTML = unlocked
+      ? `<a class="btn btn-accent" target="_blank" rel="noopener" href="${n.url}">Open Official PDF ↗</a>
+         <button class="btn" onclick="generatePrintableJeePdf(${idx})">Generate JEE Notes PDF</button>
+         <button class="btn" onclick="closeModal('previewModal')">Close</button>`
+      : `<a class="btn btn-accent" href="index.html#checkout" style="flex:1;justify-content:center;">🔒 Unlock Full PDF (₹1 Trial / 1,000 XP)</a>
+         <button class="btn" onclick="closeModal('previewModal')">Close</button>`;
+    openModal("previewModal");
+  }
+
+  async function generatePrintableJeePdf(idx) {
+    const n = CURATED_NOTES[idx];
+    document.getElementById("prevText").textContent = "Generating JEE-level formula & concept PDF sheet...";
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/jee-notes-sheet`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ student_class: n.cls, subject: n.sub, chapter: n.title })
+      });
+      const d = await r.json();
+      if (!r.ok) { document.getElementById("prevText").textContent = parseErr(d); return; }
+      addXp(15, "JEE Notes Generated");
+      const w = window.open("", "_blank");
+      if (w) {
+        w.document.title = `${n.title} — StudyDesk JEE Notes`;
+        const st = w.document.createElement("style");
+        st.textContent = "body{font-family:Inter,Arial,sans-serif;max-width:820px;margin:32px auto;padding:0 20px;line-height:1.65;color:#111;}h1{border-bottom:2px solid #111;padding-bottom:8px;}pre{white-space:pre-wrap;font-family:inherit;font-size:14px;}.bar{margin-bottom:20px;}button{padding:10px 18px;border-radius:999px;border:none;background:#111;color:#fff;font-weight:700;cursor:pointer;}@media print{.bar{display:none;}}";
+        w.document.head.appendChild(st);
+        const bar = w.document.createElement("div");
+        bar.className = "bar";
+        const pBtn = w.document.createElement("button");
+        pBtn.textContent = "Print / Save as PDF";
+        pBtn.onclick = () => w.print();
+        bar.appendChild(pBtn);
+        const h1 = w.document.createElement("h1");
+        h1.textContent = `${n.cls} ${n.sub} — ${n.title}`;
+        const pre = w.document.createElement("pre");
+        pre.textContent = d.notes || "";
+        const foot = w.document.createElement("p");
+        foot.style.cssText = "margin-top:32px;font-size:12px;color:#555;";
+        foot.textContent = "StudyDesk Notes • Created by Developer Moulik Soni";
+        w.document.body.append(bar, h1, pre, foot);
+      }
+      document.getElementById("prevText").textContent = n.preview;
+    } catch {
+      document.getElementById("prevText").textContent = "Cannot reach Python backend. Make sure uvicorn is running.";
+    }
+  }
+
+  function populateChapterSelect(clsId, subId, chapId) {
+    const cls = document.getElementById(clsId).value;
+    const sub = document.getElementById(subId).value;
+    let matches = CURATED_NOTES.filter(n => n.cls === cls && n.sub === sub);
+    if (!matches.length) matches = CURATED_NOTES.filter(n => n.cls === cls);
+    document.getElementById(chapId).innerHTML = matches.map(m => `<option value="${esc(m.title)}">${esc(m.title)}</option>`).join("");
+  }
+
+  // ========= INTERACTIVE ROUGH WORK SCRATCHPAD =========
+  function toggleScratch(id) {
+    const wrap = document.getElementById("sw_" + id);
+    if (!wrap) return;
+    const show = wrap.style.display !== "block";
+    wrap.style.display = show ? "block" : "none";
+    if (show && !wrap.dataset.init) {
+      wrap.dataset.init = "1";
+      const cvs = document.getElementById("sc_" + id);
+      cvs.width = cvs.offsetWidth || 600;
+      cvs.height = 150;
+      const ctx = cvs.getContext("2d");
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      let drawing = false;
+      const pos = e => {
+        const rect = cvs.getBoundingClientRect();
+        const pt = e.touches ? e.touches[0] : e;
+        return { x: (pt.clientX - rect.left) * (cvs.width / rect.width), y: (pt.clientY - rect.top) * (cvs.height / rect.height) };
+      };
+      const start = e => { drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+      const move = e => { if (!drawing) return; e.preventDefault(); const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+      const end = () => { drawing = false; };
+      cvs.addEventListener("mousedown", start); cvs.addEventListener("mousemove", move); window.addEventListener("mouseup", end);
+      cvs.addEventListener("touchstart", start, { passive: false }); cvs.addEventListener("touchmove", move, { passive: false }); cvs.addEventListener("touchend", end);
+    }
+  }
+  function clearScratch(id) {
+    const cvs = document.getElementById("sc_" + id);
+    if (cvs) cvs.getContext("2d").clearRect(0, 0, cvs.width, cvs.height);
+  }
+
+  // ========= PYQ ARENA ENGINE =========
+  let pyqData = [];
+  async function runPyqTest() {
+    if (!consumeAiQuota()) return;
+    const area = document.getElementById("pyqArea");
+    const exam = document.getElementById("pyqExam").value;
+    const cls = document.getElementById("pyqClass").value;
+    const sub = document.getElementById("pyqSub").value;
+    const chap = document.getElementById("pyqChap").value;
+    const count = Number(document.getElementById("pyqCount").value);
+    area.innerHTML = `<p style="color:var(--muted);">Loading real-style ${esc(exam)} PYQs for ${esc(chap)}...</p>`;
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/pyq-test`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ exam, student_class: cls, subject: sub, chapter: chap, count })
+      });
+      const d = await r.json();
+      if (!r.ok) { area.textContent = parseErr(d); return; }
+      pyqData = (d.questions || []).map(q => ({ ...q, _sub: sub, _chap: chap, _answered: false }));
+      area.innerHTML = pyqData.map((q, i) => `
+        <div class="q-card" id="pyqCard_${i}">
+          <div class="q-tags">
+            <span class="q-tag">${esc(q.exam)} ${esc(q.year)}</span>
+            <span class="q-tag">📅 ${esc(q.date)} • ${esc(q.shift)}</span>
+            <span class="q-tag chance">🔥 ${q.chance_pct}% Exam Chance</span>
+            <span class="q-tag">${esc(q.concept)}</span>
+          </div>
+          <div style="font-size:14px;font-weight:600;line-height:1.55;margin-bottom:8px;">Q${i+1}. ${esc(q.q)}</div>
+          ${q.options.map((o, j) => `<button class="opt-btn" id="pyqOpt_${i}_${j}" onclick="answerPyq(${i},${j})"><strong>${String.fromCharCode(65+j)}.</strong> ${esc(o)}</button>`).join("")}
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn" onclick="toggleScratch('pyq_${i}')">✏️ Rough Work Pad</button>
+          </div>
+          <div class="scratch-wrap" id="sw_pyq_${i}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:11.5px;color:var(--muted);">
+              <span>Rough Work Scratchpad</span>
+              <button class="btn" style="padding:4px 10px;font-size:11px;" onclick="clearScratch('pyq_${i}')">Clear</button>
+            </div>
+            <canvas class="scratch-canvas" id="sc_pyq_${i}"></canvas>
+          </div>
+          <div id="pyqExp_${i}" class="output" style="display:none;margin-top:10px;"></div>
+        </div>`).join("");
+    } catch {
+      area.textContent = "Cannot reach Python backend. Make sure uvicorn is running.";
+    }
+  }
+  function answerPyq(i, chosen) {
+    const q = pyqData[i];
+    if (!q || q._answered) return;
+    q._answered = true;
+    const correct = chosen === q.answer_index;
+    document.getElementById(`pyqOpt_${i}_${q.answer_index}`)?.classList.add("correct");
+    if (!correct) {
+      document.getElementById(`pyqOpt_${i}_${chosen}`)?.classList.add("wrong");
+      saveMistake(q._sub, q._chap, `[${q.exam} ${q.year}] ${q.q}`, q.options[q.answer_index], q.explanation);
+    } else {
+      addXp(25, "PYQ Solved");
+    }
+    const exp = document.getElementById(`pyqExp_${i}`);
+    exp.style.display = "block";
+    exp.textContent = `${correct ? "✓ Correct! (+25 XP)" : "✗ Saved to Mistake Book • Correct: " + q.options[q.answer_index]}\n\nSource: ${q.exam} ${q.year} (${q.date}, ${q.shift})\nSolution:\n${q.explanation}`;
+  }
+
+  // ========= DAILY PUZZLE & 10-15 DPP ENGINE =========
+  let curPuzzle = null;
+  async function runDailyPuzzle() {
+    const area = document.getElementById("puzzleArea");
+    area.innerHTML = `<p style="color:var(--muted);">Loading today's puzzle...</p>`;
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/daily-puzzle`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ exam: document.getElementById("puzExam").value, subject: document.getElementById("puzSub").value })
+      });
+      const d = await r.json();
+      if (!r.ok) { area.textContent = parseErr(d); return; }
+      curPuzzle = { ...d, _done: false };
+      area.innerHTML = `
+        <div class="q-card">
+          <div class="q-tags"><span class="q-tag">🧩 ${esc(d.date)}</span><span class="q-tag chance">+50 XP Reward</span></div>
+          <h4 style="margin-bottom:6px;">${esc(d.title)}</h4>
+          <p style="font-size:13.5px;line-height:1.55;margin-bottom:10px;">${esc(d.scenario)}</p>
+          ${d.options.map((o, j) => `<button class="opt-btn" id="puzOpt_${j}" onclick="answerPuzzle(${j})"><strong>${String.fromCharCode(65+j)}.</strong> ${esc(o)}</button>`).join("")}
+          <details style="margin-top:10px;font-size:12.5px;color:var(--muted);cursor:pointer;"><summary>Need a Hint?</summary><div style="margin-top:4px;">${esc(d.hint)}</div></details>
+          <div id="puzExp" class="output" style="display:none;margin-top:10px;"></div>
+        </div>`;
+    } catch {
+      area.textContent = "Cannot reach Python backend. Make sure uvicorn is running.";
+    }
+  }
+  function answerPuzzle(chosen) {
+    if (!curPuzzle || curPuzzle._done) return;
+    curPuzzle._done = true;
+    const ok = chosen === curPuzzle.answer_index;
+    document.getElementById(`puzOpt_${curPuzzle.answer_index}`)?.classList.add("correct");
+    if (!ok) document.getElementById(`puzOpt_${chosen}`)?.classList.add("wrong");
+    else addXp(50, "Daily Puzzle Cracked");
+    const exp = document.getElementById("puzExp");
+    exp.style.display = "block";
+    exp.textContent = `${ok ? "✓ Nailed It! (+50 XP)" : "✗ Answer: " + curPuzzle.options[curPuzzle.answer_index]}\n\n${curPuzzle.explanation}`;
+  }
+
+  let dppData = [];
+  async function runDppGenerator() {
+    if (!consumeAiQuota()) return;
+    const area = document.getElementById("dppArea");
+    const exam = document.getElementById("dppExam").value;
+    const sub = document.getElementById("dppSub").value;
+    const chap = document.getElementById("dppChap").value;
+    const diff = document.getElementById("dppDiff").value;
+    const count = Number(document.getElementById("dppCount").value);
+    area.innerHTML = `<p style="color:var(--muted);">Building ${count} ${esc(diff)} DPP problems for ${esc(chap)}...</p>`;
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/dpp-generator`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ exam, subject: sub, chapter: chap, difficulty: diff, count })
+      });
+      const d = await r.json();
+      if (!r.ok) { area.textContent = parseErr(d); return; }
+      dppData = (d.problems || []).map(p => ({ ...p, _sub: sub, _chap: chap, _answered: false }));
+      area.innerHTML = dppData.map((p, i) => `
+        <div class="q-card">
+          <div class="q-tags">
+            <span class="q-tag">DPP #${i+1}</span>
+            <span class="q-tag">${esc(p.difficulty)}</span>
+            <span class="q-tag">${esc(p.source_style)}</span>
+          </div>
+          <div style="font-size:14px;font-weight:600;line-height:1.55;margin-bottom:8px;">${esc(p.q)}</div>
+          ${p.options.map((o, j) => `<button class="opt-btn" id="dppOpt_${i}_${j}" onclick="answerDpp(${i},${j})"><strong>${String.fromCharCode(65+j)}.</strong> ${esc(o)}</button>`).join("")}
+          <div style="margin-top:10px;"><button class="btn" onclick="toggleScratch('dpp_${i}')">✏️ Rough Work Pad</button></div>
+          <div class="scratch-wrap" id="sw_dpp_${i}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:11.5px;color:var(--muted);">
+              <span>Rough Work Scratchpad</span>
+              <button class="btn" style="padding:4px 10px;font-size:11px;" onclick="clearScratch('dpp_${i}')">Clear</button>
+            </div>
+            <canvas class="scratch-canvas" id="sc_dpp_${i}"></canvas>
+          </div>
+          <div id="dppExp_${i}" class="output" style="display:none;margin-top:10px;"></div>
+        </div>`).join("");
+    } catch {
+      area.textContent = "Cannot reach Python backend. Make sure uvicorn is running.";
+    }
+  }
+  function answerDpp(i, chosen) {
+    const p = dppData[i];
+    if (!p || p._answered) return;
+    p._answered = true;
+    const ok = chosen === p.answer_index;
+    document.getElementById(`dppOpt_${i}_${p.answer_index}`)?.classList.add("correct");
+    if (!ok) {
+      document.getElementById(`dppOpt_${i}_${chosen}`)?.classList.add("wrong");
+      saveMistake(p._sub, p._chap, `[DPP] ${p.q}`, p.options[p.answer_index], p.solution);
+    } else {
+      addXp(20, "DPP Problem Solved");
+    }
+    const exp = document.getElementById(`dppExp_${i}`);
+    exp.style.display = "block";
+    exp.textContent = `${ok ? "✓ Correct! (+20 XP)" : "✗ Saved to Mistake Book • Answer: " + p.options[p.answer_index]}\n\nSolution:\n${p.solution}`;
+  }
+
+  // ========= 3D CONCEPT VISUALIZATION STUDIO (LIVE-SERVER SAFE) =========
+  function quick3D(sub, topic) {
+    document.getElementById("v3Subject").value = sub;
+    document.getElementById("v3Topic").value = topic;
+    runVisual3D();
+  }
+  function buildThreeSandboxHtml(sceneJs) {
+    const openT = t => "<" + t + ">";
+    const closeT = t => "<" + "/" + t + ">";
+    const safeJs = (sceneJs || "").replace(new RegExp(closeT("script"), "gi"), "<\\/" + "script>");
+    return [
+      "<!DOCTYPE html>" + openT("html") + openT("head") + '<meta charset="utf-8">' + openT("style"),
+      "body{margin:0;overflow:hidden;background:#05070d;font-family:Inter,sans-serif;color:#fff;}",
+      "#labels{position:fixed;inset:0;pointer-events:none;}",
+      ".lbl{position:absolute;transform:translate(-50%,-50%);background:rgba(10,12,20,0.82);border:1px solid rgba(255,255,255,0.22);padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap;}",
+      "#hud{position:fixed;bottom:10px;left:12px;font-size:11px;color:#94a3b8;background:rgba(0,0,0,0.55);padding:5px 10px;border-radius:999px;}",
+      "#err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;text-align:center;color:#fca5a5;}",
+      closeT("style"),
+      "<" + 'script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js">' + closeT("script"),
+      "<" + 'script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js">' + closeT("script"),
+      closeT("head") + openT("body") + '<div id="labels"></div><div id="hud">Drag to rotate • Scroll to zoom</div><div id="err"></div>' + openT("script"),
+      "const scene = new THREE.Scene(); scene.background = new THREE.Color(0x05070d);",
+      "const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 200); camera.position.set(0, 4.5, 11);",
+      "const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); document.body.appendChild(renderer.domElement);",
+      "const controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true;",
+      "scene.add(new THREE.AmbientLight(0xffffff, 0.65));",
+      "const dl = new THREE.DirectionalLight(0xffffff, 0.95); dl.position.set(8, 12, 10); scene.add(dl);",
+      "const grid = new THREE.GridHelper(16, 16, 0x2a3347, 0x151a26); grid.position.y = -3; scene.add(grid);",
+      "const labelItems = [];",
+      'function addLabel(text, x, y, z, color){ const div = document.createElement("div"); div.className = "lbl"; div.textContent = text; if(color) div.style.color = color; document.getElementById("labels").appendChild(div); labelItems.push({ div, pos: new THREE.Vector3(x, y, z) }); }',
+      'try { ' + safeJs + ' } catch (e) { const el = document.getElementById("err"); el.style.display = "flex"; el.textContent = "3D Render Error: " + e.message; }',
+      "const clock = new THREE.Clock();",
+      'function loop(){ requestAnimationFrame(loop); const t = clock.getElapsedTime(); if (typeof window.animateScene === "function") { try { window.animateScene(t); } catch {} } controls.update(); renderer.render(scene, camera); labelItems.forEach(it => { const v = it.pos.clone().project(camera); it.div.style.display = v.z < 1 ? "block" : "none"; it.div.style.left = ((v.x * 0.5 + 0.5) * window.innerWidth) + "px"; it.div.style.top = ((-v.y * 0.5 + 0.5) * window.innerHeight) + "px"; }); }',
+      "loop();",
+      'window.addEventListener("resize", () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });',
+      closeT("script") + closeT("body") + closeT("html")
+    ].join("\n");
+  }
+  async function runVisual3D() {
+    if (!consumeAiQuota()) return;
+    const topic = document.getElementById("v3Topic").value.trim();
+    const subject = document.getElementById("v3Subject").value;
+    if (!topic) return alert("Enter a topic to visualize in 3D.");
+    const st = document.getElementById("v3Status");
+    const ex = document.getElementById("v3Explain");
+    st.textContent = `Building interactive 3D model for "${topic}"...`;
+    ex.textContent = "Generating 3D geometry, motion & concept notes...";
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/visual-3d`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ topic, subject })
+      });
+      const d = await r.json();
+      if (!r.ok) { st.textContent = parseErr(d); return; }
+      document.getElementById("v3Frame").srcdoc = buildThreeSandboxHtml(d.scene_js);
+      document.getElementById("v3Legend").innerHTML = (d.legend || []).map(l => `<span class="q-tag">${esc(l)}</span>`).join("");
+      st.textContent = `Interactive 3D Ready: ${d.title} (Drag to rotate • Scroll to zoom)`;
+      ex.textContent = `${d.title}\n\n${d.explanation}`;
+      addXp(20, "3D Concept Visualized");
+    } catch {
+      st.textContent = "Cannot reach Python backend. Make sure uvicorn is running.";
+    }
+  }
+
+  // ========= PERSONAL NOTES & COMMUNITY PDFs =========
+  let personalNotes = safeJson("sd_my_notes", []);
+  function renderPersonalNotes() {
+    document.getElementById("myNotesList").innerHTML = personalNotes.length
+      ? personalNotes.map((n, i) => `
+        <div class="list-item" style="align-items:flex-start;">
+          <div><strong>${esc(n.title)}</strong> <span class="mini-pill">${esc(n.tag)}</span>
+            <p style="font-size:13px;color:var(--muted);margin-top:5px;white-space:pre-wrap;">${esc(n.body)}</p></div>
+          <button class="btn btn-danger" onclick="personalNotes.splice(${i},1);localStorage.setItem('sd_my_notes',JSON.stringify(personalNotes));renderPersonalNotes()">Delete</button>
+        </div>`).join("")
+      : `<p style="font-size:13px;color:var(--muted);">No personal notes saved yet.</p>`;
+  }
+  function savePersonalNote() {
+    const title = document.getElementById("myNoteTitle").value.trim(), body = document.getElementById("myNoteBody").value.trim(), tag = document.getElementById("myNoteTag").value;
+    if (!title || !body) return;
+    personalNotes.unshift({ title, body, tag });
+    localStorage.setItem("sd_my_notes", JSON.stringify(personalNotes));
+    document.getElementById("myNoteTitle").value = ""; document.getElementById("myNoteBody").value = "";
+    renderPersonalNotes();
+  }
+
+  async function loadCommunityNotes() {
+    try {
+      const r = await fetch(`${API_BASE}/api/notes/list`);
+      const d = await r.json();
+      const notes = d.notes || [];
+      document.getElementById("communityNotesList").innerHTML = notes.length ? notes.map(n => `
+        <div class="list-item">
+          <div><strong>${esc(n.title)}</strong><div style="font-size:12px;color:var(--muted);">${esc(n.student_class)} • ${esc(n.subject)} • by ${esc(n.uploader)}</div></div>
+          <a class="btn btn-accent" target="_blank" href="${API_BASE}${n.url}">Open PDF</a>
+        </div>`).join("") : `<p style="font-size:13px;color:var(--muted);">No community PDFs uploaded yet.</p>`;
+    } catch {}
+  }
+  document.getElementById("noteUploadForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData();
+    fd.append("title", document.getElementById("noteTitle").value);
+    fd.append("student_class", document.getElementById("noteClass").value);
+    fd.append("subject", document.getElementById("noteSubject").value);
+    fd.append("uploader", getLoggedInName());
+    fd.append("file", document.getElementById("noteFile").files[0]);
+    try {
+      const r = await fetch(`${API_BASE}/api/notes/upload`, { method: "POST", body: fd });
+      if (r.ok) { e.target.reset(); loadCommunityNotes(); }
+      else alert("Upload failed.");
+    } catch { alert("Start uvicorn first."); }
+  };
+
+  // ========= ALL 10 AI TOOLS WORKSPACE =========
+  const TOOL_API_KEYS = { doubt:"doubt-solver", flashcards:"flashcards", youtube:"yt-summarizer", mocktest:"mock-test", podcast:"pdf-podcast", essay:"essay-grader", mindmap:"mind-map", english:"english-buddy", code:"code-fixer", aitimetable:"ai-timetable" };
+  const THREAD_TOOLS = ["doubt", "youtube", "essay", "english", "code"];
+  let currentTool = null;
+
+  function setMemBadge(count) {
+    const el = document.getElementById("toolMemBadge");
+    if (el) el.textContent = `Memory: ${Math.min(15, Number(count || 0))} / 15`;
+  }
+  function renderThreadBox(el, history, assistantLabel = "AI", emptyText = "Conversation will appear here...") {
+    if (!el) return;
+    if (!history || !history.length) { el.innerHTML = `<div style="color:var(--muted);font-size:13.5px;">${esc(emptyText)}</div>`; return; }
+    el.innerHTML = history.map(m => {
+      const isUser = m.role === "user";
+      return `<div class="ai-bubble ${isUser ? "user" : "assistant"}"><div class="ai-bubble-meta">${esc(isUser ? getLoggedInName() : assistantLabel)}${m.time ? " • " + esc(m.time) : ""}</div>${esc(m.content)}</div>`;
+    }).join("");
+    el.scrollTop = el.scrollHeight;
+  }
+  async function loadToolHistory(tool) {
+    const key = TOOL_API_KEYS[tool];
+    if (!key) return;
+    let url = `${API_BASE}/api/tools/history/${encodeURIComponent(key)}`;
+    if (tool === "english") url += `?scenario=${encodeURIComponent(document.getElementById("engScen")?.value || "Daily Conversation")}`;
+    try {
+      const r = await fetch(url);
+      if (!r.ok) return;
+      const d = await r.json();
+      setMemBadge(d.count || 0);
+      if (THREAD_TOOLS.includes(tool)) {
+        const labels = { doubt:"Teacher", youtube:"Summary AI", essay:"Examiner", english:"Coach", code:"Mentor" };
+        renderThreadBox(document.getElementById("tOut"), d.history || [], labels[tool] || "AI", "Ask a question — last 15 messages stay connected.");
+      }
+    } catch { setMemBadge(0); }
+  }
+  async function resetCurrentToolMemory() {
+    if (!currentTool) return;
+    let key = TOOL_API_KEYS[currentTool] || "all";
+    if (currentTool === "english") key = `english-buddy:${document.getElementById("engScen")?.value || "Daily Conversation"}`;
+    try {
+      await fetch(`${API_BASE}/api/tools/clear-memory`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ tool: key }) });
+      setMemBadge(0);
+      ["engAudio","pAudioArea","fOut","mockArea"].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = ""; });
+      await loadToolHistory(currentTool);
+    } catch { alert("Make sure uvicorn is running."); }
+  }
+  function closeTool() {
+    currentTool = null;
+    document.getElementById("toolWorkspace").style.display = "none";
+    document.getElementById("hubGridView").style.display = "block";
+  }
+  function openTool(tool) {
+    currentTool = tool;
+    document.getElementById("hubGridView").style.display = "none";
+    document.getElementById("toolWorkspace").style.display = "block";
+    setMemBadge(0);
+    const hostStudent = esc(getLoggedInName());
+    const views = {
+      doubt: `<h2>1. Photo-to-Doubt Solver</h2><div class="form-grid"><input type="file" id="tImg" accept="image/*" /><textarea id="tQ" rows="3" placeholder="Ask a question, upload a photo, or ask a follow-up..."></textarea><select id="tLang"><option>Hinglish</option><option>English</option><option>Hindi</option></select><button class="btn btn-accent" onclick="runDoubt()">Solve Step-by-Step (+15 XP)</button></div><div id="tOut" class="ai-thread">Loading...</div>`,
+      flashcards: `<h2>2. Notes to Flashcards &amp; MCQs</h2><div class="form-grid"><input type="file" id="fImg" accept="image/*" /><textarea id="fTxt" rows="3" placeholder="Paste notes or upload a notebook photo..."></textarea><button class="btn btn-accent" onclick="runFlashcards()">Generate Flashcards (+15 XP)</button></div><div id="fOut"></div>`,
+      youtube: `<h2>3. YouTube Lecture Summarizer</h2><div class="form-grid"><input id="ytUrl" placeholder="Paste YouTube URL (or type a follow-up question)..." /><button class="btn btn-accent" onclick="runYoutube()">Summarize / Follow-Up (+15 XP)</button></div><div id="tOut" class="ai-thread">Loading...</div>`,
+      mocktest: `<h2>4. AI Mock Test Generator</h2><div class="form-grid"><div class="row-2"><select id="mExam"><option>JEE Main</option><option>NEET</option><option>Class 12 Boards</option><option>Class 10 Boards</option></select><select id="mDiff"><option>Medium</option><option>Hard</option><option>Easy</option></select></div><input id="mChap" placeholder="Chapter Name" /><button class="btn btn-accent" onclick="runMockTest()">Start 5-Question Test</button></div><div id="mockArea"></div>`,
+      podcast: `<h2>5. Study Podcast — Tony Stark &amp; ${hostStudent}</h2><p style="font-size:13px;color:var(--muted);margin-top:4px;">Fun Q&amp;A podcast where ${hostStudent} asks doubts and Tony Stark explains your PDF.</p><div class="form-grid"><input type="file" id="pPdf" accept=".pdf" /><div class="row-2"><select id="pStyle"><option>Hinglish</option><option>English</option></select><select id="pLength"><option value="auto">Auto Length (5–7m short • 15–20m large notes)</option><option value="5min">5–7 Min Deep Dive</option><option value="15min">15–20 Min Full Chapter Episode</option></select></div><button class="btn btn-accent" onclick="runPodcast()">Generate Podcast with Tony Stark (+15 XP)</button></div><div id="pAudioArea" style="margin-top:12px;"></div><div id="tOut" class="output">Full Q&amp;A script between Tony Stark and ${hostStudent} will appear here...</div>`,
+      essay: `<h2>6. Essay &amp; Board Answer Grader</h2><div class="form-grid"><input id="eTopic" placeholder="Topic" /><textarea id="eText" rows="5" placeholder="Paste your answer or revised draft..."></textarea><button class="btn btn-accent" onclick="runEssay()">Grade My Answer (+15 XP)</button></div><div id="tOut" class="ai-thread">Loading...</div>`,
+      mindmap: `<h2>7. Formula &amp; Concept Mind-Map</h2><div class="form-grid"><input id="mmTopic" placeholder="Topic (e.g., Electrostatics)" /><button class="btn btn-accent" onclick="runMindMap()">Draw / Update Mind-Map (+15 XP)</button></div><div id="mmCanvas" class="output"></div>`,
+      english: `<h2>8. Spoken English &amp; Interview Buddy</h2><div class="form-grid"><select id="engScen" onchange="loadToolHistory('english')"><option>Daily Conversation</option><option>Interview</option></select><textarea id="engText" rows="3" placeholder="Speak or type your reply (Enter to send)..."></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" onclick="startMic()">Speak with Mic</button><button class="btn btn-accent" onclick="runEnglish()">Send</button></div></div><div id="engAudio" style="margin-top:10px;"></div><div id="tOut" class="ai-thread">Loading...</div>`,
+      code: `<h2>9. Coding Bug Fixer</h2><div class="form-grid"><select id="cLang"><option>Python</option><option>C++</option><option>Java</option></select><textarea id="cCode" rows="5" placeholder="Paste code or follow-up..."></textarea><input id="cErr" placeholder="Optional error message" /><button class="btn btn-accent" onclick="runCodeFix()">Fix Code (+15 XP)</button></div><div id="tOut" class="ai-thread">Loading...</div>`,
+      aitimetable: `<h2>10. AI Timetable Builder</h2><div class="form-grid"><div class="row-2"><select id="ttExam"><option>JEE</option><option>NEET</option><option>Boards</option></select><input type="number" id="ttHours" value="6" placeholder="Hours/day" /></div><div class="row-2"><input id="ttWeak" placeholder="Weak chapters" /><input type="date" id="ttDate" /></div><button class="btn btn-accent" onclick="runAiTimetable()">Generate Plan</button></div><div id="tOut" class="output">Plan will appear here...</div>`
+    };
+    document.getElementById("toolContent").innerHTML = views[tool];
+    if (tool === "english") {
+      document.getElementById("engText").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); runEnglish(); } });
+    }
+    loadToolHistory(tool);
+  }
+
+  async function runDoubt() {
+    if (!consumeAiQuota()) return;
+    const out = document.getElementById("tOut"), qEl = document.getElementById("tQ"), imgEl = document.getElementById("tImg");
+    out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant" id="tmpLoad">Solving...</div>`);
+    const fd = new FormData(); fd.append("question", qEl.value); fd.append("language", document.getElementById("tLang").value);
+    if (imgEl.files[0]) fd.append("image", imgEl.files[0]);
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/doubt-solver`, { method: "POST", body: fd });
+      const d = await r.json(); document.getElementById("tmpLoad")?.remove();
+      if (!r.ok) { out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">${esc(parseErr(d))}</div>`); return; }
+      qEl.value = ""; imgEl.value = ""; setMemBadge(d.memory_count); addXp(15, "Doubt Solved"); await loadToolHistory("doubt");
+    } catch { document.getElementById("tmpLoad")?.remove(); out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">Start uvicorn first.</div>`); }
+  }
+  async function runFlashcards() {
+    if (!consumeAiQuota()) return;
+    const out = document.getElementById("fOut"); out.innerHTML = "<p style='margin-top:12px;'>Generating...</p>";
+    const fd = new FormData(); fd.append("notes_text", document.getElementById("fTxt").value);
+    if (document.getElementById("fImg").files[0]) fd.append("image", document.getElementById("fImg").files[0]);
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/flashcards`, { method: "POST", body: fd });
+      const d = await r.json(); if (!r.ok) { out.textContent = parseErr(d); return; }
+      setMemBadge(d.memory_count); addXp(15, "Flashcards Built");
+      out.innerHTML = `<div class="flash-grid">` + (d.flashcards || []).map(c => `<div class="flashcard" onclick="const a=this.querySelector('.a');a.style.display=a.style.display==='none'?'block':'none'"><strong>${esc(c.front)}</strong><p class="a" style="display:none;margin-top:10px;color:var(--muted);">${esc(c.back)}</p></div>`).join("") + `</div>`;
+    } catch { out.textContent = "Start uvicorn first."; }
+  }
+  async function runYoutube() {
+    if (!consumeAiQuota()) return;
+    const out = document.getElementById("tOut"), urlEl = document.getElementById("ytUrl");
+    out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant" id="tmpLoad">Summarizing...</div>`);
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/yt-summarizer`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ url: urlEl.value }) });
+      const d = await r.json(); document.getElementById("tmpLoad")?.remove();
+      if (!r.ok) { out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">${esc(parseErr(d))}</div>`); return; }
+      urlEl.value = ""; addXp(15, "Lecture Summarized"); await loadToolHistory("youtube");
+    } catch { document.getElementById("tmpLoad")?.remove(); out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">Start uvicorn first.</div>`); }
+  }
+  let currentMock = [];
+  async function runMockTest() {
+    if (!consumeAiQuota()) return;
+    const area = document.getElementById("mockArea"); area.innerHTML = "<p>Creating test...</p>";
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/mock-test`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ exam: document.getElementById("mExam").value, difficulty: document.getElementById("mDiff").value, chapter: document.getElementById("mChap").value || "Physics", count: 5 }) });
+      const d = await r.json(); if (!r.ok) { area.textContent = parseErr(d); return; }
+      setMemBadge(d.memory_count); currentMock = d.questions || [];
+      area.innerHTML = currentMock.map((q, i) => `<div class="output"><strong>Q${i+1}. ${esc(q.q)}</strong><br/><br/>${q.options.map((o, j) => `<label style="display:block;margin:6px 0;"><input type="radio" name="mq${i}" value="${j}"> ${esc(o)}</label>`).join("")}<div id="mexp${i}" style="margin-top:8px;display:none;color:var(--muted);"></div></div>`).join("") + `<button class="btn btn-accent" style="margin-top:14px;" onclick="gradeMock()">Submit Test</button><div id="mScore" style="margin-top:10px;font-weight:700;"></div>`;
+    } catch { area.textContent = "Start uvicorn first."; }
+  }
+  function gradeMock() {
+    let score = 0;
+    currentMock.forEach((q, i) => {
+      const c = document.querySelector(`input[name="mq${i}"]:checked`);
+      const ok = c && Number(c.value) === q.answer_index; if (ok) score++;
+      const el = document.getElementById(`mexp${i}`); el.style.display = "block";
+      el.textContent = `${ok ? "✓ Correct" : "✗ Answer: " + q.options[q.answer_index]} — ${q.explanation}`;
+    });
+    if (score > 0) addXp(score * 15, `Mock Score ${score}/${currentMock.length}`);
+    document.getElementById("mScore").textContent = `Score: ${score} / ${currentMock.length}`;
+  }
+  async function runPodcast() {
+    if (!consumeAiQuota()) return;
+    const out = document.getElementById("tOut"), audioArea = document.getElementById("pAudioArea"), f = document.getElementById("pPdf").files[0];
+    if (!f) { out.textContent = "Select a PDF first."; return; }
+    const studentName = getLoggedInName();
+    audioArea.innerHTML = "";
+    out.textContent = `Recording 5–20 min Q&A podcast with Tony Stark & ${studentName}... Please keep this tab open.`;
+    const fd = new FormData(); fd.append("pdf", f); fd.append("style", document.getElementById("pStyle").value);
+    fd.append("length_mode", document.getElementById("pLength").value); fd.append("student_name", studentName);
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/pdf-podcast`, { method: "POST", body: fd });
+      const d = await r.json(); if (!r.ok) { out.textContent = parseErr(d); return; }
+      const meta = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;font-size:12.5px;color:var(--muted);"><span>Hosts: Tony Stark &amp; ${esc(studentName)} • ~${d.estimated_minutes || 5} min • ${d.turns || 20} turns</span>${d.audio_url ? `<a class="btn" download="tony-stark-podcast.mp3" href="${API_BASE}${d.audio_url}">Download MP3</a>` : ""}</div>`;
+      audioArea.innerHTML = d.audio_url ? `${meta}<audio controls style="width:100%;" src="${API_BASE}${d.audio_url}"></audio>` : meta;
+      out.textContent = d.script; addXp(15, "Podcast Created"); await loadToolHistory("podcast");
+    } catch { out.textContent = "Start uvicorn first."; }
+  }
+  async function runEssay() {
+    if (!consumeAiQuota()) return;
+    const out = document.getElementById("tOut"), txtEl = document.getElementById("eText");
+    out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant" id="tmpLoad">Grading...</div>`);
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/essay-grader`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ topic: document.getElementById("eTopic").value, essay: txtEl.value }) });
+      const d = await r.json(); document.getElementById("tmpLoad")?.remove();
+      if (!r.ok) { out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">${esc(parseErr(d))}</div>`); return; }
+      txtEl.value = ""; setMemBadge(d.memory_count); addXp(15, "Essay Graded"); await loadToolHistory("essay");
+    } catch { document.getElementById("tmpLoad")?.remove(); out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">Start uvicorn first.</div>`); }
+  }
+  async function runMindMap() {
+    if (!consumeAiQuota()) return;
+    const c = document.getElementById("mmCanvas"); c.textContent = "Drawing...";
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/mind-map`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ topic: document.getElementById("mmTopic").value }) });
+      const d = await r.json(); if (!r.ok) { c.textContent = parseErr(d); return; }
+      setMemBadge(d.memory_count); addXp(15, "Mind-Map Created");
+      try {
+        if (typeof mermaid !== "undefined") { const { svg } = await mermaid.render("mm_" + Date.now(), d.mermaid); c.innerHTML = svg; }
+        else { c.textContent = d.mermaid; }
+      } catch { c.textContent = d.mermaid; }
+    } catch { c.textContent = "Start uvicorn first."; }
+  }
+  function startMic() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert("Use Chrome or Edge for voice input."); return; }
+    const rec = new SR(); rec.lang = "en-IN";
+    rec.onresult = e => { document.getElementById("engText").value = e.results[0][0].transcript; };
+    rec.start();
+  }
+  async function runEnglish() {
+    if (!consumeAiQuota()) return;
+    const out = document.getElementById("tOut"), inp = document.getElementById("engText"), scenario = document.getElementById("engScen").value;
+    out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant" id="tmpLoad">Coach is replying...</div>`);
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/english-buddy`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ user_speech: inp.value.trim(), scenario }) });
+      const d = await r.json(); document.getElementById("tmpLoad")?.remove();
+      if (!r.ok) { out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">${esc(parseErr(d))}</div>`); return; }
+      inp.value = "";
+      document.getElementById("engAudio").innerHTML = d.audio_url ? `<audio controls autoplay style="width:100%;" src="${API_BASE}${d.audio_url}"></audio>` : "";
+      setMemBadge(d.memory_count); addXp(10, "Speaking Practice");
+      renderThreadBox(out, d.history || [{ role: "assistant", content: d.reply }], "Coach");
+    } catch { document.getElementById("tmpLoad")?.remove(); out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">Start uvicorn first.</div>`); }
+  }
+  async function runCodeFix() {
+    if (!consumeAiQuota()) return;
+    const out = document.getElementById("tOut"), codeEl = document.getElementById("cCode"), errEl = document.getElementById("cErr");
+    out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant" id="tmpLoad">Fixing...</div>`);
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/code-fixer`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ language: document.getElementById("cLang").value, code: codeEl.value, error: errEl.value }) });
+      const d = await r.json(); document.getElementById("tmpLoad")?.remove();
+      if (!r.ok) { out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">${esc(parseErr(d))}</div>`); return; }
+      errEl.value = ""; setMemBadge(d.memory_count); addXp(15, "Bug Fixed"); await loadToolHistory("code");
+    } catch { document.getElementById("tmpLoad")?.remove(); out.insertAdjacentHTML("beforeend", `<div class="ai-bubble assistant">Start uvicorn first.</div>`); }
+  }
+  async function runAiTimetable() {
+    if (!consumeAiQuota()) return;
+    const out = document.getElementById("tOut"); out.textContent = "Building plan...";
+    try {
+      const r = await fetch(`${API_BASE}/api/tools/ai-timetable`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ exam: document.getElementById("ttExam").value, hours_per_day: Number(document.getElementById("ttHours").value || 6), weak_chapters: document.getElementById("ttWeak").value || "Core chapters", exam_date: document.getElementById("ttDate").value || "Next Month" }) });
+      const d = await r.json(); if (!r.ok) { out.textContent = parseErr(d); return; }
+      setMemBadge(d.memory_count); out.textContent = (d.slots || []).map(s => `${s.time}  |  ${s.subject} — ${s.task}`).join("\n");
+    } catch { out.textContent = "Start uvicorn first."; }
+  }
+
+  // ========= TASKS, CALENDAR, SCHEDULE, POMODORO, LIVE CHAT, OTP AUTH =========
+  let tasks = safeJson("sd_tasks", []);
+  function renderTasks() {
+    const done = tasks.filter(t => t.status === "done").length, missed = tasks.filter(t => t.status === "missed").length;
+    document.getElementById("taskStats").textContent = `${done} Done (✓) • ${missed} Missed (✗) • ${tasks.length} Total`;
+    document.getElementById("taskList").innerHTML = tasks.map((t, i) => `<div class="list-item ${t.status}"><span>${esc(t.text)}</span><div style="display:flex;gap:6px;"><button class="btn" onclick="tasks[${i}].status='done';localStorage.setItem('sd_tasks',JSON.stringify(tasks));renderTasks()">✓</button><button class="btn btn-danger" onclick="tasks[${i}].status='missed';localStorage.setItem('sd_tasks',JSON.stringify(tasks));renderTasks()">✗</button><button class="btn" onclick="tasks.splice(${i},1);localStorage.setItem('sd_tasks',JSON.stringify(tasks));renderTasks()">Del</button></div></div>`).join("");
+  }
+  function addTask() { if (!check3DayTrial("Task Manager")) return; const inp = document.getElementById("taskInput"); if (!inp.value.trim()) return; tasks.unshift({ text: inp.value.trim(), status: "pending" }); inp.value = ""; localStorage.setItem("sd_tasks", JSON.stringify(tasks)); renderTasks(); }
+
+  let reminders = safeJson("sd_reminders", []);
+  function enableBrowserNotifications() { if (!("Notification" in window)) return alert("Not supported."); Notification.requestPermission().then(p => alert("Notifications: " + p)); }
+  function renderReminders() { document.getElementById("reminderList").innerHTML = reminders.map((r, i) => `<div class="list-item"><div><strong>${esc(r.title)}</strong><div style="font-size:12px;color:var(--muted);">${new Date(r.time).toLocaleString()}</div></div><button class="btn btn-danger" onclick="reminders.splice(${i},1);localStorage.setItem('sd_reminders',JSON.stringify(reminders));renderReminders()">Remove</button></div>`).join(""); }
+  function addReminder() { if (!check3DayTrial("Exam Calendar")) return; const title = document.getElementById("calTitle").value.trim(), time = document.getElementById("calDateTime").value; if (!title || !time) return; reminders.push({ title, time, fired: false }); localStorage.setItem("sd_reminders", JSON.stringify(reminders)); document.getElementById("calTitle").value = ""; renderReminders(); }
+
+  const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  let activeDay = "Monday", schedules = safeJson("sd_schedules", {});
+  function renderSchedule() {
+    document.getElementById("dayTabs").innerHTML = DAYS.map(d => `<button class="day-tab ${d===activeDay?'active':''}" onclick="activeDay='${d}';renderSchedule()">${d.slice(0,3)}</button>`).join("");
+    const items = schedules[activeDay] || [];
+    document.getElementById("scheduleList").innerHTML = items.length ? items.map((s, i) => `<div class="list-item"><div><strong>${esc(s.time)} — ${esc(s.subject)}</strong><div style="font-size:12px;color:var(--muted);">${esc(s.note)}</div></div><button class="btn btn-danger" onclick="schedules[activeDay].splice(${i},1);localStorage.setItem('sd_schedules',JSON.stringify(schedules));renderSchedule()">Del</button></div>`).join("") : `<p style="font-size:13px;color:var(--muted);">No slots for ${activeDay} yet.</p>`;
+  }
+  function addScheduleSlot() { const t = document.getElementById("schTime").value.trim(), s = document.getElementById("schSubject").value.trim(), n = document.getElementById("schNote").value.trim(); if (!t || !s) return; schedules[activeDay] = schedules[activeDay] || []; schedules[activeDay].push({ time: t, subject: s, note: n }); localStorage.setItem("sd_schedules", JSON.stringify(schedules)); document.getElementById("schTime").value = ""; document.getElementById("schSubject").value = ""; document.getElementById("schNote").value = ""; renderSchedule(); }
+  function applyPreset(type) { const p = { JEE:[{time:"06:00 AM - 07:30 AM",subject:"Physics Theory",note:"Formulas + NCERT"},{time:"04:00 PM - 06:00 PM",subject:"Maths PYQs",note:"30 problems"},{time:"08:30 PM - 10:00 PM",subject:"Chemistry",note:"Organic & Inorganic"}], NEET:[{time:"06:00 AM - 08:00 AM",subject:"Biology NCERT",note:"Line-by-line"},{time:"04:00 PM - 06:00 PM",subject:"Chemistry",note:"NCERT + PYQs"}], BOARDS:[{time:"06:30 AM - 08:00 AM",subject:"Revision",note:"1-page notes"},{time:"05:00 PM - 07:00 PM",subject:"Sample Paper",note:"Step-marking"}] }; schedules[activeDay] = p[type]; localStorage.setItem("sd_schedules", JSON.stringify(schedules)); renderSchedule(); }
+
+  let pomoSec = 1500, pomoBase = 1500, pomoInt = null;
+  function renderPomo() { document.getElementById("pomoDisplay").textContent = `${String(Math.floor(pomoSec/60)).padStart(2,"0")}:${String(pomoSec%60).padStart(2,"0")}`; }
+  function setPomo(m) { pausePomo(); pomoBase = m*60; pomoSec = pomoBase; renderPomo(); }
+  function startPomo() { if (pomoInt) return; pomoInt = setInterval(() => { if (pomoSec > 0) { pomoSec--; renderPomo(); } else { pausePomo(); addXp(30, "Pomodoro Finished"); alert("Focus session complete! (+30 XP)"); } }, 1000); }
+  function pausePomo() { clearInterval(pomoInt); pomoInt = null; }
+  function resetPomo() { pausePomo(); pomoSec = pomoBase; renderPomo(); }
+
+  let ws = null;
+  function connectChat() {
+    if (ws && ws.readyState === WebSocket.OPEN) return;
+    ws = new WebSocket(`${WS_BASE}/ws/chat`);
+    ws.onopen = () => { document.getElementById("onlineCount").textContent = "Live • Connected"; };
+    ws.onmessage = e => { const d = JSON.parse(e.data); if (d.online) document.getElementById("onlineCount").textContent = `${d.online} student(s) online`; if (d.type === "history") { document.getElementById("chatBox").innerHTML = ""; d.messages.forEach(appendChat); } else if (d.type === "msg") appendChat(d); };
+    ws.onclose = () => { document.getElementById("onlineCount").textContent = "Offline — start Python server"; };
+  }
+  function appendChat(m) { const box = document.getElementById("chatBox"); box.innerHTML += `<div class="chat-msg"><div class="chat-meta"><strong>${esc(m.user)}</strong><span>[${esc(m.room)}]</span><span>${esc(m.time)}</span></div><div>${esc(m.text)}</div></div>`; box.scrollTop = box.scrollHeight; }
+  function sendChat(e) { e.preventDefault(); if (!ws || ws.readyState !== WebSocket.OPEN) return alert("Start uvicorn first!"); const inp = document.getElementById("chatInput"); ws.send(JSON.stringify({ user: document.getElementById("chatUser").value, room: document.getElementById("chatRoom").value, text: inp.value })); inp.value = ""; }
+
+  async function sendAuthOtp() {
+    const st = document.getElementById("authStatus"); st.textContent = "Sending OTP...";
+    try {
+      const r = await fetch(`${API_BASE}/api/auth/send-otp`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ name: document.getElementById("authName").value.trim(), phone: document.getElementById("authPhone").value.trim(), email: document.getElementById("authEmail").value.trim() }) });
+      const d = await r.json(); st.textContent = r.ok ? d.message : parseErr(d, "Could not send OTP.");
+    } catch { st.textContent = "Start uvicorn first."; }
+  }
+  async function verifyAuthOtp() {
+    const st = document.getElementById("authStatus");
+    try {
+      const r = await fetch(`${API_BASE}/api/auth/verify-otp`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ email: document.getElementById("authEmail").value.trim(), otp: document.getElementById("authOtp").value.trim() }) });
+      const d = await r.json();
+      if (r.ok) {
+        localStorage.setItem("sd_user", d.user.name);
+        localStorage.setItem("sd_email", d.user.email);
+        document.getElementById("welcomeText").textContent = "Welcome, " + d.user.name;
+        document.getElementById("chatUser").value = d.user.name;
+        document.getElementById("authBtn").textContent = d.user.name;
+        closeModal("authModal");
+        if (currentTool === "podcast") openTool("podcast");
+      } else st.textContent = parseErr(d, "Wrong OTP");
+    } catch { st.textContent = "Start uvicorn first."; }
+  }
+
+  // ========= INITIALIZE WORKSPACE SAFELY =========
+  const savedTheme = localStorage.getItem("sd_theme") || "mono-dark";
+  handleThemeSelect(FREE_THEMES.includes(savedTheme) || isPro() ? savedTheme : "mono-dark");
+  refreshPlanUI();
+  refreshXpUI();
+  renderMistakes();
+  renderCuratedNotes();
+  renderPersonalNotes();
+  renderTasks();
+  renderReminders();
+  renderSchedule();
+  populateChapterSelect("pyqClass", "pyqSub", "pyqChap");
+  populateChapterSelect("dppClass", "dppSub", "dppChap");
+
+  const savedUser = localStorage.getItem("sd_user");
+  if (savedUser) {
+    document.getElementById("welcomeText").textContent = "Welcome, " + savedUser;
+    document.getElementById("chatUser").value = savedUser;
+    document.getElementById("authBtn").textContent = savedUser;
+  }
+
+  setTimeout(() => openPlansPopup(false), 1800);
+  setInterval(() => openPlansPopup(false), 3600000);
+  setInterval(() => {
+    const now = Date.now(); let ch = false;
+    reminders.forEach(r => { if (!r.fired && new Date(r.time).getTime() <= now) { r.fired = true; ch = true; if (Notification.permission === "granted") new Notification("StudyDesk Reminder", { body: r.title }); else alert("Reminder: " + r.title); } });
+    if (ch) localStorage.setItem("sd_reminders", JSON.stringify(reminders));
+  }, 15000);
+</script>
+</body>
+</html>

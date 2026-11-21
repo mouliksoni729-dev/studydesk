@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyDesk — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #000000; --surface: #0b0b0d; --surface-2: #141418; --border: rgba(255,255,255,0.12); --text: #ffffff; --muted: #8e8e93; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Inter", -apple-system, sans-serif; }
+    body { min-height: 100vh; background: var(--bg); color: var(--text); padding: 26px; }
+    .login-card { max-width: 380px; margin: 12vh auto; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 30px; }
+    h1, h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 6px; }
+    input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); color: #fff; font-size: 14px; outline: none; }
+    input:focus { border-color: #fff; }
+    .btn { padding: 9px 15px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: #fff; font-weight: 600; font-size: 12.5px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-white { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
+    .btn-danger { color: #f87171; border-color: rgba(248,113,113,0.35); background: transparent; }
+    #panel { max-width: 1080px; margin: 0 auto; display: none; }
+    .top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+    .stat span { font-size: 12px; color: var(--muted); }
+    .stat strong { display: block; font-size: 26px; font-weight: 800; margin-top: 4px; }
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .pill { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; border: 1px solid var(--border); }
+    .otp { font-family: monospace; font-size: 15px; font-weight: 700; letter-spacing: 2px; }
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div id="loginBox" class="login-card">
+    <h1>Admin Sign In</h1>
+    <p class="sub">Verify ₹1 Trial & ₹99 Pro UPI payments</p>
+    <form id="loginForm">
+      <label>Username</label>
+      <input type="text" id="user" required />
+      <label>Password</label>
+      <input type="password" id="pass" required />
+      <button class="btn btn-white" type="submit" style="width:100%;justify-content:center;margin-top:18px;padding:12px;">Log In</button>
+      <p id="err" style="color:#f87171;margin-top:10px;font-size:13px;"></p>
+    </form>
+  </div>
+
+  <div id="panel">
+    <div class="top">
+      <div>
+        <h2>Payment Approval Console</h2>
+        <p class="sub" style="margin:0;">Match the 12-digit UTR in your UPI app before approving</p>
+      </div>
+      <div class="actions">
+        <a class="btn" href="index.html">View Site</a>
+        <button class="btn" onclick="loadData()">Refresh</button>
+        <button class="btn btn-danger" onclick="sessionStorage.clear();location.reload();">Log Out</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Pending Review</span><strong id="stPending">0</strong></div>
+      <div class="stat"><span>Approved (OTP Sent)</span><strong id="stApproved">0</strong></div>
+      <div class="stat"><span>Activated Users</span><strong id="stActivated">0</strong></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Email</th><th>Phone</th><th>12-Digit UTR</th><th>Status</th><th>6-Digit OTP</th><th>Action</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Change to your live Render URL after deploying
+    const API_BASE = "http://127.0.0.1:8000";
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+    function openPanel() {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("panel").style.display = "block";
+      loadData();
+    }
+
+    document.getElementById("loginForm").onsubmit = async (e) => {
+      e.preventDefault();
+      document.getElementById("err").textContent = "";
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: document.getElementById("user").value, password: document.getElementById("pass").value }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Login failed");
+        sessionStorage.setItem("token", data.access_token);
+        openPanel();
+      } catch (err) { document.getElementById("err").textContent = err.message; }
+    };
+
+    async function loadData() {
+      const res = await fetch(`${API_BASE}/api/admin/requests`, {
+        headers: { Authorization: "Bearer " + sessionStorage.getItem("token") },
+      });
+      if (res.status === 401) { sessionStorage.clear(); location.reload(); return; }
+      const data = await res.json();
+      const rows = data.requests || [];
+      let p = 0, ap = 0, ac = 0;
+      const tbody = document.getElementById("rows");
+      tbody.innerHTML = "";
+
+      for (const r of rows) {
+        if (r.status === "PENDING") p++;
+        if (r.status === "APPROVED") ap++;
+        if (r.status === "ACTIVATED") ac++;
+
+        let act = "—";
+        if (r.status === "PENDING") {
+          act = `<div class="actions">
+                   <button class="btn btn-white" onclick="decide('${esc(r.id)}','approve')">Approve</button>
+                   <button class="btn btn-danger" onclick="decide('${esc(r.id)}','reject')">Reject</button>
+                 </div>`;
+        } else if (r.status === "APPROVED" && r.otp_code) {
+          const msg = encodeURIComponent(`Your StudyDesk payment is verified! Your 6-digit activation OTP is: ${r.otp_code}`);
+          act = `<a class="btn btn-white" target="_blank" rel="noopener" href="https://wa.me/91${esc(r.phone)}?text=${msg}">Send OTP on WhatsApp</a>`;
+        }
+
+        tbody.innerHTML += `<tr>
+          <td>${esc(r.email)}</td>
+          <td>${esc(r.phone)}</td>
+          <td><code>${esc(r.utr)}</code></td>
+          <td><span class="pill">${esc(r.status)}</span></td>
+          <td><span class="otp">${esc(r.otp_code || "—")}</span></td>
+          <td>${act}</td>
+        </tr>`;
+      }
+      document.getElementById("stPending").textContent = p;
+      document.getElementById("stApproved").textContent = ap;
+      document.getElementById("stActivated").textContent = ac;
+    }
+
+    async function decide(id, action) {
+      if (!confirm(`Confirm ${action.toUpperCase()}?`)) return;
+      const res = await fetch(`${API_BASE}/api/admin/decide`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + sessionStorage.getItem("token") },
+        body: JSON.stringify({ request_id: id, action }),
+      });
+      if (!res.ok) { const d = await res.json(); alert(d.detail || "Failed"); return; }
+      loadData();
+    }
+
+    if (sessionStorage.getItem("token")) openPanel();
+  </script>
+</body>
+</html>

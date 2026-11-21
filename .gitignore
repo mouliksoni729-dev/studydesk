@@ -1,0 +1,10 @@
+.env
+backend/.env
+.venv/
+backend/.venv/
+__pycache__/
+backend/audio/*
+backend/uploads/*
+backend/ai_memory.json
+backend/tg_users.json
+backend/yt_cache.json
